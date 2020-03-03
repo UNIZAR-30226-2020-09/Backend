@@ -2,7 +2,7 @@ package com.Backend.model;
 import javax.persistence.*;
 
 @Entity
-@Table
+@Table(name = "Pandora_user")
 public class User {
 
     @Id
