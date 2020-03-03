@@ -5,11 +5,11 @@
 
     <!-- La clave sería poner como id una interfaz común y tan solo tener que cambiar class para trabajar con una
     implementación u otra sin tener que tocar el código fuente en absoluto, usar getBean("id") para obtener la instancia
-    del objeto -->
+    del objeto
     <bean id ="usuarioPepe" class = "com.Backend.model.User">
-        <!-- Inyecto la dependencia de constructor -->
+         Inyecto la dependencia de constructor
         <constructor-arg name = "userName" value = "Pepe"/>
-    </bean>
+    </bean> -->
 
  <!-- EStá comentado porque no he puesto constructor vacío en User al añadir el que tiene argumentos
       Tendrías que añadirlo para que funcionara.
@@ -20,9 +20,9 @@
         <property name = "userName" value = "Alejandro"/>
     </bean> -->
 
-    <bean id ="pass" class = "com.Backend.model.Password">
-        <!-- Inyecto la dependencia de nombre -->
+    <!-- <bean id ="pass" class = "com.Backend.model.Password">
+        Inyecto la dependencia de nombre
         <property name = "pass" value = "1234"/>
-    </bean>
+    </bean> -->
 
 </beans>
