@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 //@RestController
 public class BackendApplication {
 
-	@RequestMapping("/")
+	@RequestMapping("/hello")
 	@ResponseBody
-	String home() {
+	public String home() {
 		return "Hello World!";
 	}
 
