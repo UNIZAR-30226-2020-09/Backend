@@ -18,6 +18,8 @@ target/
 *.iws
 *.iml
 *.ipr
+src/main/resources/application.properties
+### Evitamos filtrar la contraseña ###
 
 ### NetBeans ###
 /nbproject/private/
