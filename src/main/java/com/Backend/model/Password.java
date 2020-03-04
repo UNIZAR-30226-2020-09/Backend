@@ -45,9 +45,9 @@ public class Password {
     public static final String COLUMN_CAT_NAME = "cat_id";
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = Password.COLUMN_CAT_NAME)
-    private Category categoria;
+    private Category category;
 
-    protected Password() {}
+    public Password() {}
 
     public Password(String password) {
         this.password = password;

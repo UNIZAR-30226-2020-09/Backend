@@ -32,6 +32,8 @@ public class User {
     *  podemos hacerlo así, se sugiere utilizar una clase intermedia con una
     *  relación 1:N a cada una de las otras dos tablas, como dice aquí:
     *  https://stackoverflow.com/questions/9816932/mapping-extra-attribute-in-a-join-table-jpa-2
+    *  https://mkyong.com/hibernate/hibernate-many-to-many-example-join-table-extra-column-annotation/
+    *  parece una guarrada, debo investigar más
     */
     /*@JoinTable(
 
@@ -48,7 +50,7 @@ public class User {
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Set<Category> categorySet;
 
-    protected User() {}
+    public User() {}
 
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;

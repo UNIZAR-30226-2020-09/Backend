@@ -24,26 +24,29 @@ public class Category {
     private String categoryName;
 
     /* Relación 1:N con categoría, extremo del 1 */
-    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private Set<Password> passwordSet;
 
     // fetch = FetchType.LAZY o fetch = FetchType.EAGER, aún no lo he estudiado bien
     /* Relación 1:N con usuario, extremo de la N */
     public static final String COLUMN_CAT_NAME = "user_id";
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = Category.COLUMN_CAT_NAME)
+    @JoinColumn(name = Category.COLUMN_CAT_NAME, nullable = false)
     private User usuario;
 
-    protected Category() {}
-
-    public Category(String categoryName) {
+    public Category(String categoryName, User usuario) {
+        this.usuario = usuario;
         this.categoryName = categoryName;
     }
 
+    public Category(){}
+
     @Override
     public String toString() {
-        return "User{" +
+        return "Category{" +
+                "id=" + id +
                 ", categoryName='" + categoryName + '\'' +
+                ", usuario=" + usuario +
                 '}';
     }
 }
