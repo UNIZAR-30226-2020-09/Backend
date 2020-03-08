@@ -1,29 +1,23 @@
 package com.Backend.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 
+@Data
 @Entity
-@Table(name = Mensaje.TABLE_NAME)
+@Table
 public class Mensaje {
 
-    public static final String TABLE_NAME= "Mensaje";
-
     @Id
-    @Getter
-    @Setter
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String mailMessage;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String bodyMessage;
 

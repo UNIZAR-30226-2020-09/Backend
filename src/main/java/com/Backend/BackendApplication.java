@@ -8,16 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @SpringBootApplication
-//@RestController
 public class BackendApplication {
 
-	@RequestMapping("/hello")
-	@ResponseBody
-	public String home() {
-		return "Hello World!";
-	}
-
 	public static void main(String[] args) {
+
 		SpringApplication.run(BackendApplication.class, args);
 	}
 

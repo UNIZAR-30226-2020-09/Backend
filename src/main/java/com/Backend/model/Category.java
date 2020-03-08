@@ -5,31 +5,31 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Set;
 
+@Data
 @Entity
-@Table(name = Category.TABLE_NAME)
+@Table
 public class Category {
 
-    public static final String TABLE_NAME= "Category";
-
     @Id
-    @Getter
-    @Setter
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String categoryName;
 
     /* Relación 1:N con categoría, extremo del 1 */
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category")
     private Set<Password> passwordSet;
 
-    // fetch = FetchType.LAZY o fetch = FetchType.EAGER, aún no lo he estudiado bien
+    /*
+     * Se puede decidir entre cargar todos los atributos de la entidad inmediatamente
+     * o que un proxy los cargue cuando interese
+     * fetch = FetchType.LAZY o fetch = FetchType.EAGER, está la opción por defecto actualmente
+     */
+
     /* Relación 1:N con usuario, extremo de la N */
     public static final String COLUMN_CAT_NAME = "user_id";
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = Category.COLUMN_CAT_NAME, nullable = false)
     private User usuario;
 

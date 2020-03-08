@@ -1,9 +1,12 @@
 package com.Backend.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import javax.persistence.*;
+import java.util.List;
 
+@Data
 @Entity
 @Table(name = Password.TABLE_NAME)
 public class Password {
@@ -11,39 +14,30 @@ public class Password {
     public static final String TABLE_NAME= "Password";
 
     @Id
-    @Getter
-    @Setter
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    @Getter
-    @Setter
     private String passwordName;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String password;
 
-    @Getter
-    @Setter
     private String optionalText;
 
-    @Getter
-    @Setter
     private String userName;
 
+    /* Relación 1:N con la tabla entre User y Password, extremo del 1*/
+    @OneToMany(mappedBy = "password")
+    private List<OwnsPassword> users;
+
     /*
-    Por decidir el tipo de dato de la fecha de expiración
-    @Getter
-    @Setter
-    @Column(name = "expirationDate", nullable = false)
-    private int expirationDate;
-    */
+     * Decidir el tipo de dato de la fecha de expiración
+     * Existe tipo Date en java.
+     */
 
     /* Relación 1:N con categoría, extremo de la N */
     public static final String COLUMN_CAT_NAME = "cat_id";
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = Password.COLUMN_CAT_NAME)
     private Category category;
 
