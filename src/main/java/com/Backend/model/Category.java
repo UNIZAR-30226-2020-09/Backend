@@ -3,23 +3,30 @@ package com.Backend.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-@Data
 @Entity
+@NoArgsConstructor
 @Table
 public class Category {
 
     @Id
+    @Getter
+    @Setter
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
+    @Getter
+    @Setter
+    @Column(unique = true, nullable = false)
     private String categoryName;
 
-    /* Relación 1:N con categoría, extremo del 1 */
+    /* Relación 1:N con password, extremo del 1 */
+    @Getter
     @OneToMany(mappedBy = "category")
-    private Set<Password> passwordSet;
+    private Set<Password> passwordSet = new HashSet<>();
 
     /*
      * Se puede decidir entre cargar todos los atributos de la entidad inmediatamente
@@ -31,6 +38,7 @@ public class Category {
     public static final String COLUMN_CAT_NAME = "user_id";
     @ManyToOne
     @JoinColumn(name = Category.COLUMN_CAT_NAME, nullable = false)
+    @Getter
     private User usuario;
 
     public Category(String categoryName, User usuario) {
@@ -38,14 +46,11 @@ public class Category {
         this.categoryName = categoryName;
     }
 
-    public Category(){}
-
     @Override
     public String toString() {
         return "Category{" +
                 "id=" + id +
                 ", categoryName='" + categoryName + '\'' +
-                ", usuario=" + usuario +
                 '}';
     }
 }

@@ -1,13 +1,17 @@
 package com.Backend.model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
 @Entity
+@NoArgsConstructor
 @Table(name = User.TABLE_NAME)
 public class User {
 
@@ -15,14 +19,20 @@ public class User {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
+    @Getter
+    @Setter
     private Long id;
 
-    @Column(unique = true, nullable = false)
     // Considerar utilizar @NaturalId, probablemente sea mejor opción,
     // debo investigar todavía esta opción
+    @Column(unique = true, nullable = false)
+    @Getter
+    @Setter
     private String mail;
 
     @Column(nullable = false)
+    @Getter
+    @Setter
     private String masterPassword;
 
     /*
@@ -40,14 +50,13 @@ public class User {
      * Relación 1:N con la tabla entre User y Password, extremo del 1
      */
     @OneToMany(mappedBy = "user")
-    private List<OwnsPassword> passwords;
-
+    @Getter
+    private Set<OwnsPassword> passwordSet = new HashSet<>();
 
     /* Relación 1:N con categoría, extremo del 1 */
     @OneToMany(mappedBy = "usuario")
-    private Set<Category> categorySet;
-
-    public User() {}
+    @Getter
+    private Set<Category> categorySet = new HashSet<>();
 
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;

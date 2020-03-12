@@ -1,15 +1,15 @@
 package com.Backend.model;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
 @Entity
+@NoArgsConstructor
 @Table
-public class Mensaje {
+public class Message {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -21,10 +21,8 @@ public class Mensaje {
     @Column(nullable = false)
     private String bodyMessage;
 
-    public Mensaje(String mailMessage, String bodyMessage) {
+    public Message(String mailMessage, String bodyMessage) {
         this.bodyMessage = bodyMessage;
         this.mailMessage = mailMessage;
     }
-
-    public Mensaje(){}
 }
