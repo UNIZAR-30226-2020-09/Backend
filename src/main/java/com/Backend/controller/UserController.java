@@ -4,11 +4,15 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.repository.IUserRepo;
+import com.Backend.security.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
+import static com.Backend.security.Constants.*;
 
 @RestController
 public class UserController {
@@ -22,14 +26,14 @@ public class UserController {
      * Cuando no todos los atributos sean obligatorios añadir required = false junto al name.
      * se puede hacer que devuelva algún JSON que confirme o deniegue la correcta inserción
      */
-    @CrossOrigin
-    @PostMapping("/api/users/registro")
+    @PostMapping(REGISTRO_URL)
     public ResponseEntity<String> registro (@RequestBody UserRegisterRequest userRegReq) {
         if (!userRegReq.isValid()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Faltan campos.");
         }
         else {
-            if (!repo.existsByMail(userRegReq.getMail())) {
+            if (!repo.existsByUsername(userRegReq.getUsername())) {
+                userRegReq.setPassword(new BCryptPasswordEncoder().encode(userRegReq.getPassword()));
                 repo.save(userRegReq.getAsUser());
                 return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido insertado.");
             } else {
@@ -38,10 +42,14 @@ public class UserController {
         }
     }
 
+    @PostMapping(LOGIN_URL)
+    public ResponseEntity<String> login (@RequestBody UserRegisterRequest userRegReq) {
+        return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido eliminado");
+    }
+
     /*
      * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
      */
-    @CrossOrigin
     @GetMapping("api/users/consultar/{id}")
     public User consulta(@PathVariable Long id) throws UserNotFoundException {
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -51,8 +59,7 @@ public class UserController {
     /*
      * Devuelve la información de todos los usuarios de la base de datos
      */
-    @CrossOrigin
-    @GetMapping("api/users/consultar")
+    @GetMapping(LISTAR_TODOS_URL)
     public List<User> all() {
         return repo.findAll();
     }
@@ -61,7 +68,6 @@ public class UserController {
     /*
      * Método para eliminar usuarios, en proceso de debug, deberíamos usar DELETE
      */
-    @CrossOrigin
     @DeleteMapping("api/users/delete/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) throws UserNotFoundException {
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
