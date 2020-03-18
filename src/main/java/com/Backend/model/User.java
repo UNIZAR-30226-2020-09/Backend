@@ -28,12 +28,16 @@ public class User {
     @Column(unique = true, nullable = false)
     @Getter
     @Setter
-    private String username; // Se corresponde cin el mail
+    private String mail; // Se corresponde cin el mail
+
+    @Setter
+    @Getter
+    private String token;
 
     @Column(nullable = false)
     @Getter
     @Setter
-    private String password;
+    private String masterPassword;
 
     /*
      * Relacion M:N con password, este método tiene un problema, no existe
@@ -58,9 +62,9 @@ public class User {
     @Getter
     private Set<Category> categorySet = new HashSet<>();
 
-    public User(String username, String password) {
-        this.password = password;
-        this.username = username;
+    public User(String mail, String masterPassword) {
+        this.masterPassword = masterPassword;
+        this.mail = mail;
     }
 }
 

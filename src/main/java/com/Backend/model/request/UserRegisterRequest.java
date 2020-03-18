@@ -11,16 +11,16 @@ import lombok.Setter;
 public class UserRegisterRequest {
 
     @Getter
-    private String username;
+    private String mail;
     @Getter
     @Setter
-    private String password;
+    private String masterPassword;
 
     public boolean isValid(){
-        return username!=null && password!=null;
+        return mail!=null && masterPassword!=null;
     }
 
     public User getAsUser(){
-        return new User(username,password);
+        return new User(mail,masterPassword);
     }
 }
