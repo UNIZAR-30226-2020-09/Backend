@@ -20,6 +20,7 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.GET,TOKEN_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.DELETE,ELIMINAR_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
