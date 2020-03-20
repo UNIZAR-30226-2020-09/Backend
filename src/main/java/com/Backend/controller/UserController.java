@@ -28,7 +28,7 @@ public class UserController {
      * Cuando no todos los atributos sean obligatorios añadir required = false junto al name.
      * se puede hacer que devuelva algún JSON que confirme o deniegue la correcta inserción
      */
-    @PostMapping(REGISTRO_URL)
+    @PostMapping(REGISTRO_USUARIO_URL)
     public ResponseEntity<String> registro(@RequestBody UserRegisterRequest userRegReq) {
         if (!userRegReq.isValid()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Faltan campos.");
@@ -46,8 +46,8 @@ public class UserController {
     /*
      * Falta adaptar los códigos de respuesta
      */
-    @PostMapping(LOGIN_URL)
-    public ResponseEntity<User> login(@RequestBody UserRegisterRequest userRegReq) {
+    @PostMapping(LOGIN_USUARIO_URL)
+    public ResponseEntity<String> login(@RequestBody UserRegisterRequest userRegReq) {
         if (userRegReq.isValid() && repo.existsByMail(userRegReq.getMail())) {
 
             User recuperado = repo.findByMail(userRegReq.getMail());
@@ -55,45 +55,62 @@ public class UserController {
 
             if (b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
                 String token = getJWTToken(recuperado);
-                User user = new User();
-                user.setMasterPassword(userRegReq.getMasterPassword());
-                user.setToken(token);
-                return ResponseEntity.status(HttpStatus.OK).body(user);
+                return ResponseEntity.status(HttpStatus.OK).body(token);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userRegReq.getAsUser());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userRegReq.getAsUser());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
     /*
      * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
      */
-    @GetMapping(CONSULTAR_PROPIA_INFO)
-    public User consulta(HttpServletRequest request) throws UserNotFoundException {
-        Long id = getUserFromRequest(request);
-        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        return usuario;
+    @GetMapping(CONSULTAR_USUARIO_URL)
+    public ResponseEntity<User>  consulta(HttpServletRequest request) throws UserNotFoundException {
+        Long id = getUserIdFromRequest(request);
+        if (id != null && repo.existsById(id)){
+            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+            return ResponseEntity.status(HttpStatus.OK).body(usuario);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
+
+
+    /*
+     * Método para eliminar usuario
+     */
+    @DeleteMapping(ELIMINAR_USUARIO_URL)
+    public ResponseEntity<String> eliminar(HttpServletRequest request) throws UserNotFoundException {
+        Long id = getUserIdFromRequest(request);
+        if (id != null) {
+            if (repo.existsById(id)) {
+                repo.deleteById(id);
+                return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido eliminado");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya no existe");
+            }
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sesión expirada");
+        }
+    }
+
+    /*
+     * Método para logout
+     */
+
+
 
     /*
      * Devuelve la información de todos los usuarios de la base de datos
+     * SOLO CON PROPOSITO DE DEBUG
      */
-    @GetMapping(LISTAR_TODOS_URL)
+    @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
     public List<User> all() {
         return repo.findAll();
     }
-
-
-    /*
-     * Método para eliminar usuarios, en proceso de debug, deberíamos usar DELETE
-     * ADAPTAR AL TOKEN
-     */
-    /*@DeleteMapping("api/users/delete/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) throws UserNotFoundException {
-        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        repo.deleteById(usuario.getId());
-        return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido eliminado");
-    }*/
 }

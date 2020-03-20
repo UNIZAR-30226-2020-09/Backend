@@ -19,24 +19,18 @@ import static java.lang.Long.parseLong;
 
 public class TokenUtils {
 
-    public static Long getUserFromRequest(HttpServletRequest request){
+    public static Long getUserIdFromRequest(HttpServletRequest request){
         final String authorization = request.getHeader("Authorization");
         //El 7 proviene de eliminar la cabecera "Bearer "
-        return parseLong(getUserNameFromToken(authorization.substring(7)));
+        return parseLong(getUserIdFromToken(authorization.substring(7)));
     }
 
     public static String getJWTToken(User usuario) {
-        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList("ROLE_USER");
 
         String token = Jwts
                 .builder()
                 .setId(UUID.randomUUID().toString()) // El id debe ser único
                 .setSubject(usuario.getId().toString()) // A quién pertenece el token
-                .claim("authorities",
-                        grantedAuthorities.stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512,
@@ -45,7 +39,7 @@ public class TokenUtils {
         return TOKEN_BEARER_PREFIX + token;
     }
 
-    public static String getUserNameFromToken(String token) {
+    public static String getUserIdFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 

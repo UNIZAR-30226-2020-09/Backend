@@ -18,9 +18,11 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, REGISTRO_URL).permitAll()
-                .antMatchers(HttpMethod.POST,LOGIN_URL).permitAll()
-                .antMatchers(HttpMethod.GET,LISTAR_TODOS_URL).permitAll()
+                .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.GET,CONSULTAR_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.DELETE,ELIMINAR_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
                 .anyRequest().authenticated();
     }
 
