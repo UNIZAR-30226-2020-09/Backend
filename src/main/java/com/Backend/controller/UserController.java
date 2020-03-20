@@ -65,6 +65,22 @@ public class UserController {
     }
 
     /*
+     *
+     */
+    @GetMapping(TOKEN_USUARIO_URL)
+    public ResponseEntity<String> login(HttpServletRequest request) throws UserNotFoundException {
+        Long id = getUserIdFromRequest(request);
+        if (id != null && repo.existsById(id)){
+            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+            String token = getJWTToken(usuario);
+                return ResponseEntity.status(HttpStatus.OK).body(token);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    /*
      * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
      */
     @GetMapping(CONSULTAR_USUARIO_URL)

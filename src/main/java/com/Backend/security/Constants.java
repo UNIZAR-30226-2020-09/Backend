@@ -2,12 +2,13 @@ package com.Backend.security;
 
 public class Constants {
 
-    public static final String LOGIN_USUARIO_URL = "/api/users/login";
-    public static final String LOGOUT_USUARIO_URL = "api/users/logout";
-    public static final String REGISTRO_USUARIO_URL = "/api/users/registroUser";
-    public static final String CONSULTAR_TODOS_USUARIOS_URL = "/api/users/consultarTodosUsuarios";
-    public static final String CONSULTAR_USUARIO_URL =  "/api/users/consultarUsuario";
-    public static final String ELIMINAR_USUARIO_URL = "/api/users/eliminarUsuario";
+    public static final String LOGIN_USUARIO_URL = "/api/usuarios/login";
+    public static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
+    public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
+    public static final String REGISTRO_USUARIO_URL = "/api/usuarios/registro";
+    public static final String CONSULTAR_TODOS_USUARIOS_URL = "/api/usuarios/consultarTodos";
+    public static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
+    public static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
 
     //Recomendable dejarlo así, según el estándar
     public static final String HEADER_AUTHORIZATION_KEY = "Authorization";
