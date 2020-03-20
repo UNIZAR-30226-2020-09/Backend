@@ -1,6 +1,5 @@
 package com.Backend.controller;
 
-import com.Backend.model.Message;
 import com.Backend.model.request.MessageRequest;
 import com.Backend.repository.IMensajeRepo;
 import org.springframework.beans.factory.annotation.Autowired;

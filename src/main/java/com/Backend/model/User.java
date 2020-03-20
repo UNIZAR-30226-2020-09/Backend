@@ -1,13 +1,11 @@
 package com.Backend.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,7 +26,11 @@ public class User {
     @Column(unique = true, nullable = false)
     @Getter
     @Setter
-    private String mail;
+    private String mail; // Se corresponde cin el mail
+
+    @Setter
+    @Getter
+    private String token;
 
     @Column(nullable = false)
     @Getter
@@ -62,15 +64,5 @@ public class User {
         this.masterPassword = masterPassword;
         this.mail = mail;
     }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", mail='" + mail + '\'' +
-                ", masterPassword='" + masterPassword + '\'' +
-                '}';
-    }
-
 }
 
