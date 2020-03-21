@@ -4,6 +4,8 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.repository.IUserRepo;
+import com.google.gson.JsonObject;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.Backend.security.Constants.*;
-import static com.Backend.utils.TokenUtils.*;
+import static com.Backend.utils.TokenUtils.getJWTToken;
+import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
 public class UserController {
@@ -34,16 +37,25 @@ public class UserController {
      * se puede hacer que devuelva algún JSON que confirme o deniegue la correcta inserción
      */
     @PostMapping(REGISTRO_USUARIO_URL)
-    public ResponseEntity<String> registro(@RequestBody UserRegisterRequest userRegReq) {
+    public ResponseEntity<JSONObject> registro(@RequestBody UserRegisterRequest userRegReq) {
+        JSONObject res = new JSONObject();
         if (!userRegReq.isValid()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Faltan campos.");
+
+            res.put("http_status", HttpStatus.BAD_REQUEST.value());
+            res.put("text", "Faltan campos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         } else {
             if (!repo.existsByMail(userRegReq.getMail())) {
                 userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
                 repo.save(userRegReq.getAsUser());
-                return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido insertado.");
+
+                res.put("http_status", HttpStatus.OK.value());
+                res.put("text", "El usuario ha sido insertado.");
+                return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El email ya está asociado a una cuenta.");
+                res.put("http_status", HttpStatus.BAD_REQUEST.value());
+                res.put("text", "El email ya está asociado a una cuenta.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         }
     }
@@ -52,7 +64,8 @@ public class UserController {
      * Falta adaptar los códigos de respuesta
      */
     @PostMapping(LOGIN_USUARIO_URL)
-    public ResponseEntity<String> login(@RequestBody UserRegisterRequest userRegReq) {
+    public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
+        JSONObject res = new JSONObject();
         if (userRegReq.isValid() && repo.existsByMail(userRegReq.getMail())) {
 
             User recuperado = repo.findByMail(userRegReq.getMail());
@@ -60,12 +73,20 @@ public class UserController {
 
             if (b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
                 String token = getJWTToken(recuperado);
-                return ResponseEntity.status(HttpStatus.OK).body(token);
+
+                res.put("http_status", HttpStatus.OK.value());
+                res.put("text", "Sesión iniciada.");
+                res.put("token", token);
+                return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                res.put("http_status", HttpStatus.BAD_REQUEST.value());
+                res.put("text", "Credenciales incorrectos");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            res.put("http_status", HttpStatus.BAD_REQUEST.value());
+            res.put("text", "Credenciales incorrectos");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
@@ -73,12 +94,17 @@ public class UserController {
      *
      */
     @GetMapping(TOKEN_USUARIO_URL)
-    public ResponseEntity<String> login(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject> login(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
+        JSONObject res = new JSONObject();
         if (id != null && repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             String token = getJWTToken(usuario);
-                return ResponseEntity.status(HttpStatus.OK).body(token);
+
+            res.put("http_status", HttpStatus.OK.value());
+            res.put("text", "OK");
+            res.put("token", token);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
 
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -89,14 +115,20 @@ public class UserController {
      * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
      */
     @GetMapping(CONSULTAR_USUARIO_URL)
-    public ResponseEntity<User>  consulta(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject>  consulta(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
+        JSONObject res = new JSONObject();
         if (id != null && repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            return ResponseEntity.status(HttpStatus.OK).body(usuario);
+            res.put("http_status", HttpStatus.OK.value());
+            res.put("text", "OK");
+            res.put("user", usuario);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            res.put("http_status", HttpStatus.UNAUTHORIZED.value());
+            res.put("text", "UNAUTHORIZED");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }
 
@@ -105,18 +137,25 @@ public class UserController {
      * Método para eliminar usuario
      */
     @DeleteMapping(ELIMINAR_USUARIO_URL)
-    public ResponseEntity<String> eliminar(HttpServletRequest request) {
+    public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
+        JSONObject res = new JSONObject();
         if (id != null) {
             if (repo.existsById(id)) {
                 repo.deleteById(id);
-                return ResponseEntity.status(HttpStatus.OK).body("El usuario ha sido eliminado");
+                res.put("http_status", HttpStatus.OK.value());
+                res.put("text", "OK");
+                return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya no existe");
+                res.put("http_status", HttpStatus.BAD_REQUEST.value());
+                res.put("text", "BAD_REQUEST");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         }
         else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sesión expirada");
+            res.put("http_status", HttpStatus.UNAUTHORIZED.value());
+            res.put("text", "UNAUTHORIZED");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }
 
@@ -132,6 +171,7 @@ public class UserController {
      */
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
     public List<User> all() {
+        JSONObject res = new JSONObject();
         return repo.findAll();
     }
 }

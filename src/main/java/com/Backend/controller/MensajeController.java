@@ -2,6 +2,7 @@ package com.Backend.controller;
 
 import com.Backend.model.request.MessageRequest;
 import com.Backend.repository.IMensajeRepo;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,18 @@ public class MensajeController {
      */
     @CrossOrigin
     @PostMapping(CONTACTO_URL)
-    public ResponseEntity<String> contactar(@RequestBody MessageRequest msgReq){
+    public ResponseEntity<JSONObject> contactar(@RequestBody MessageRequest msgReq){
+        JSONObject res = new JSONObject();
+
         if(msgReq.isValid()){
             repo.save(msgReq.getAsMessage());
-            return ResponseEntity.status(HttpStatus.OK).body("Mensaje insertado correctamente.");
+            res.put("http_status", HttpStatus.OK.value());
+            res.put("text", "OK, Mensaje insertado correctamente.");
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al guardar el mensaje.");
+            res.put("http_status", HttpStatus.OK.value());
+            res.put("text", "BAD_REQUEST, Error al guardar el mensaje.");
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         }
     }
 }
