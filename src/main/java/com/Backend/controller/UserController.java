@@ -19,6 +19,11 @@ import static com.Backend.utils.TokenUtils.*;
 @RestController
 public class UserController {
 
+    public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
+    public static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
+    public static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
+    public static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
+
     @Autowired
     IUserRepo repo;
 
@@ -100,7 +105,7 @@ public class UserController {
      * Método para eliminar usuario
      */
     @DeleteMapping(ELIMINAR_USUARIO_URL)
-    public ResponseEntity<String> eliminar(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<String> eliminar(HttpServletRequest request) {
         Long id = getUserIdFromRequest(request);
         if (id != null) {
             if (repo.existsById(id)) {
