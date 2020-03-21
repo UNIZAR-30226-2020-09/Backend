@@ -22,6 +22,11 @@ import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 @RestController
 public class UserController {
 
+    public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
+    public static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
+    public static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
+    public static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
+
     @Autowired
     IUserRepo repo;
 
