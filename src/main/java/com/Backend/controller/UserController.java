@@ -19,6 +19,7 @@ import static com.Backend.utils.TokenUtils.getJWTToken;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS})
 public class UserController {
 
     public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
@@ -35,7 +36,6 @@ public class UserController {
      * Cuando no todos los atributos sean obligatorios añadir required = false junto al name.
      * se puede hacer que devuelva algún JSON que confirme o deniegue la correcta inserción
      */
-    @CrossOrigin
     @PostMapping(REGISTRO_USUARIO_URL)
     public ResponseEntity<JSONObject> registro(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
@@ -63,7 +63,6 @@ public class UserController {
     /*
      * Falta adaptar los códigos de respuesta
      */
-    @CrossOrigin
     @PostMapping(LOGIN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
@@ -94,7 +93,6 @@ public class UserController {
     /*
      *
      */
-    @CrossOrigin
     @GetMapping(TOKEN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
@@ -116,7 +114,6 @@ public class UserController {
     /*
      * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
      */
-    @CrossOrigin
     @GetMapping(CONSULTAR_USUARIO_URL)
     public ResponseEntity<JSONObject>  consulta(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
@@ -139,7 +136,6 @@ public class UserController {
     /*
      * Método para eliminar usuario
      */
-    @CrossOrigin
     @DeleteMapping(ELIMINAR_USUARIO_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
@@ -173,7 +169,6 @@ public class UserController {
      * Devuelve la información de todos los usuarios de la base de datos
      * SOLO CON PROPOSITO DE DEBUG
      */
-    @CrossOrigin
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
     public List<User> all() {
         JSONObject res = new JSONObject();
