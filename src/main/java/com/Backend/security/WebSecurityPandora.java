@@ -15,15 +15,31 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
-                .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
-                .antMatchers(HttpMethod.OPTIONS,LOGIN_USUARIO_URL).permitAll()
-                .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
-                .antMatchers(HttpMethod.POST,CONTACTO_URL).permitAll()
-                .anyRequest().authenticated();
+        //http.csrf().disable()
+        http.cors()
+    }
+    
+    @Bean
+    protected CorsConfigurationSource corsConfigurationSource() {
+        
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        final CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(ImmutableList.of("*"));
+        configuration.setAllowedMethods(ImmutableList.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }
+/*
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
+    }
+}*/
