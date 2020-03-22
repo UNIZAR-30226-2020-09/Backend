@@ -20,6 +20,7 @@ import static com.Backend.utils.TokenUtils.getJWTToken;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
 public class UserController {
 
     public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
