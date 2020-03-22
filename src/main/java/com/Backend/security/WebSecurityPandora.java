@@ -11,6 +11,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.google.common.collect.ImmutableList;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.Collections;
 
@@ -22,8 +24,15 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //http.csrf().disable()
-        http.cors();
+        http.cors().and().csrf().disable()
+                .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeRequests()
+                .antMatchers("/api/").permitAll()
+                .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
+                .antMatchers(HttpMethod.POST,CONTACTO_URL).permitAll()
+                .anyRequest().authenticated();
     }
     
     @Bean
@@ -40,13 +49,3 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
     }
 
 }
-/*
-@Configuration
-public class WebConfig extends WebMvcConfigurerAdapter {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
-    }
-}*/
