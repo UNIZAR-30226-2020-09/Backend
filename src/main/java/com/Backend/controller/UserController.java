@@ -22,6 +22,7 @@ import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS})
 public class UserController {
 
+    /* URLs que no son accesibles desde ninguna otra clase */
     public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
     public static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
     public static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
@@ -41,20 +42,19 @@ public class UserController {
         JSONObject res = new JSONObject();
         if (!userRegReq.isValid()) {
 
-            res.put("http_status", HttpStatus.BAD_REQUEST.value());
-            res.put("text", "Faltan campos.");
+            res.put("statusText", "Faltan campos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+
         } else {
             if (!repo.existsByMail(userRegReq.getMail())) {
                 userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
                 repo.save(userRegReq.getAsUser());
 
-                res.put("http_status", HttpStatus.OK.value());
-                res.put("text", "El usuario ha sido insertado.");
+                res.put("statusText", "El usuario ha sido insertado.");
                 return ResponseEntity.status(HttpStatus.OK).body(res);
+
             } else {
-                res.put("http_status", HttpStatus.BAD_REQUEST.value());
-                res.put("text", "El email ya está asociado a una cuenta.");
+                res.put("statusText", "El email ya está asociado a una cuenta.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         }
@@ -73,19 +73,15 @@ public class UserController {
 
             if (b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
                 String token = getJWTToken(recuperado);
-
-                res.put("http_status", HttpStatus.OK.value());
-                res.put("text", "Sesión iniciada.");
+                res.put("statusText", "Sesión iniciada.");
                 res.put("token", token);
                 return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
-                res.put("http_status", HttpStatus.BAD_REQUEST.value());
-                res.put("text", "Credenciales incorrectos");
+                res.put("statusText", "Credenciales incorrectos");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         } else {
-            res.put("http_status", HttpStatus.BAD_REQUEST.value());
-            res.put("text", "Credenciales incorrectos");
+            res.put("statusText", "Credenciales incorrectos");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
@@ -101,8 +97,7 @@ public class UserController {
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             String token = getJWTToken(usuario);
 
-            res.put("http_status", HttpStatus.OK.value());
-            res.put("text", "OK");
+            res.put("statusText", "OK");
             res.put("token", token);
             return ResponseEntity.status(HttpStatus.OK).body(res);
 
@@ -120,14 +115,14 @@ public class UserController {
         JSONObject res = new JSONObject();
         if (id != null && repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            res.put("http_status", HttpStatus.OK.value());
-            res.put("text", "OK");
+
+            res.put("statusText", "OK");
             res.put("user", usuario);
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
-            res.put("http_status", HttpStatus.UNAUTHORIZED.value());
-            res.put("text", "UNAUTHORIZED");
+
+            res.put("statusText", "UNAUTHORIZED");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }
@@ -137,24 +132,22 @@ public class UserController {
      * Método para eliminar usuario
      */
     @DeleteMapping(ELIMINAR_USUARIO_URL)
-    public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (id != null) {
             if (repo.existsById(id)) {
                 repo.deleteById(id);
-                res.put("http_status", HttpStatus.OK.value());
-                res.put("text", "OK");
+                res.put("statusText", "OK");
                 return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
-                res.put("http_status", HttpStatus.BAD_REQUEST.value());
-                res.put("text", "BAD_REQUEST");
+
+                res.put("statusText", "BAD_REQUEST");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
             }
         }
         else{
-            res.put("http_status", HttpStatus.UNAUTHORIZED.value());
-            res.put("text", "UNAUTHORIZED");
+            res.put("statusText", "UNAUTHORIZED");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }

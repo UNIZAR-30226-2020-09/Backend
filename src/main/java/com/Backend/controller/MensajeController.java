@@ -26,12 +26,10 @@ public class MensajeController {
 
         if(msgReq.isValid()){
             repo.save(msgReq.getAsMessage());
-            res.put("http_status", HttpStatus.OK.value());
-            res.put("text", "OK, Mensaje insertado correctamente.");
+            res.put("statusText", "OK, Mensaje insertado correctamente.");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
-            res.put("http_status", HttpStatus.OK.value());
-            res.put("text", "BAD_REQUEST, Error al guardar el mensaje.");
+            res.put("statusText", "BAD_REQUEST, Error al guardar el mensaje.");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
     }

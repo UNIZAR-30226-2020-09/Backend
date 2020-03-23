@@ -4,13 +4,27 @@ import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.User;
+import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IUserRepo;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
+import static com.Backend.utils.TokenUtils.getJWTToken;
+import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
 public class CatController {
+
+    /* URLs que no son accesibles desde ninguna otra clase */
+    public static final String INSERT_CATEGORY_URL = "api/category/insert";
 
     /*
      * Anota warning "débil", según he leído hacer autowired a un atributo que es una interfaz
@@ -21,6 +35,29 @@ public class CatController {
 
     @Autowired
     IUserRepo repoUser;
+
+ /*   @PostMapping(INSERT_CATEGORY_URL)
+    public ResponseEntity<JSONObject> login(HttpServletRequest request, @RequestBody String categoryName) throws UserNotFoundException {
+
+        Long id = getUserIdFromRequest(request);
+        User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        JSONObject res = new JSONObject();
+
+        repoCat.findByUserAndCategoryName(usuario,)
+
+        JSONObject res = new JSONObject();
+        if (id != null && repo.existsById(id)){
+            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+            String token = getJWTToken(usuario);
+
+            res.put("statusText", "OK");
+            res.put("token", token);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }*/
 
     /*
      * Devuelve si existe un JSON con la info de la categoría, en caso contrario lanza excepcion

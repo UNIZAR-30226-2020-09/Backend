@@ -9,7 +9,10 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@Table
+/*@Table(
+        uniqueConstraints=
+        @UniqueConstraint(columnNames={"categoryName", "usuario"})
+)*/
 public class Category {
 
     @Id
@@ -20,7 +23,7 @@ public class Category {
 
     @Getter
     @Setter
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String categoryName;
 
     /* Relación 1:N con password, extremo del 1 */
