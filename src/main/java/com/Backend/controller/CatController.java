@@ -36,28 +36,25 @@ public class CatController {
     @Autowired
     IUserRepo repoUser;
 
- /*   @PostMapping(INSERT_CATEGORY_URL)
+    @PostMapping(INSERT_CATEGORY_URL)
     public ResponseEntity<JSONObject> login(HttpServletRequest request, @RequestBody String categoryName) throws UserNotFoundException {
 
         Long id = getUserIdFromRequest(request);
         User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         JSONObject res = new JSONObject();
 
-        repoCat.findByUserAndCategoryName(usuario,)
+        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, categoryName);
 
-        JSONObject res = new JSONObject();
-        if (id != null && repo.existsById(id)){
-            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            String token = getJWTToken(usuario);
-
-            res.put("statusText", "OK");
-            res.put("token", token);
+        if(!existsCat){
+            repoCat.save(new Category(categoryName, usuario));
+            res.put("statusText", "Categoría creada correctamente");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-    }*/
+        else {
+            res.put("statusText", "Ya existe una categoría con ese nombre");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+    }
 
     /*
      * Devuelve si existe un JSON con la info de la categoría, en caso contrario lanza excepcion

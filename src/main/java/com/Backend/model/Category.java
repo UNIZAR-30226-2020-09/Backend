@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 /*@Table(
         uniqueConstraints=
-        @UniqueConstraint(columnNames={"categoryName", "usuario"})
+        @UniqueConstraint(columnNames={"categoryName", "user_id"})
 )*/
 public class Category {
 
@@ -38,7 +38,7 @@ public class Category {
      */
 
     /* Relación 1:N con usuario, extremo de la N */
-    public static final String COLUMN_CAT_NAME = "user_id";
+    public static final String COLUMN_CAT_NAME = "FK_User";
     @ManyToOne
     @JoinColumn(name = Category.COLUMN_CAT_NAME, nullable = false)
     @Getter
