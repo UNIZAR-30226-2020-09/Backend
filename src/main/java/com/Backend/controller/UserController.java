@@ -3,6 +3,7 @@ package com.Backend.controller;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.response.UserResponse;
 import com.Backend.repository.IUserRepo;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.Backend.security.Constants.*;
@@ -117,7 +119,7 @@ public class UserController {
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
             res.put("statusText", "OK");
-            res.put("user", usuario);
+            res.put("user", new UserResponse(usuario));
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
@@ -163,8 +165,13 @@ public class UserController {
      * SOLO CON PROPOSITO DE DEBUG
      */
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
-    public List<User> all() {
-        JSONObject res = new JSONObject();
-        return repo.findAll();
+    public List<UserResponse> all() {
+        List<User> listaUsers = repo.findAll();
+        List<UserResponse> listaRespuesta = new ArrayList<>();
+
+        for(User u : listaUsers)
+            listaRespuesta.add(new UserResponse(u));
+
+        return listaRespuesta;
     }
 }

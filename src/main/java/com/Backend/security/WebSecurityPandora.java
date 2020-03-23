@@ -27,7 +27,6 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/api/").permitAll()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
