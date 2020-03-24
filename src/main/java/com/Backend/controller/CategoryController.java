@@ -20,7 +20,7 @@ import java.util.List;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
-public class CatController {
+public class CategoryController {
 
     /* URLs que no son accesibles desde ninguna otra clase */
     public static final String INSERTAR_CATEGORIA_URL = "/api/categorias/insertar";
@@ -37,18 +37,24 @@ public class CatController {
     @Autowired
     IUserRepo repoUser;
 
-    /*@PostMapping(INSERTAR_CATEGORIA_URL)
-    public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
-                                               @RequestBody InsertDeleteCategoryRequest idcr) throws UserNotFoundException {
-
+    public User getUserFromRequest(HttpServletRequest request) throws UserNotFoundException{
         Long id = getUserIdFromRequest(request);
         User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return usuario;
+    }
+
+    @PostMapping(INSERTAR_CATEGORIA_URL)
+    public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
+                                               @RequestBody InsertDeleteCategoryRequest idcr)
+            throws UserNotFoundException{
+
+        User usuario = getUserFromRequest(request);
         JSONObject res = new JSONObject();
 
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getName());
+        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
 
         if (!existsCat) {
-            repoCat.save(new Category(idcr.getName(), usuario));
+            repoCat.save(new Category(idcr.getCategoryName(), usuario));
             res.put("statusText", "Categoría creada correctamente");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
@@ -61,19 +67,18 @@ public class CatController {
     public ResponseEntity<JSONObject> eliminar(@RequestBody InsertDeleteCategoryRequest idcr,
                                                HttpServletRequest request) throws UserNotFoundException {
 
-        Long id = getUserIdFromRequest(request);
-        User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User usuario = getUserFromRequest(request);
         JSONObject res = new JSONObject();
 
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getName());
+        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
 
         if (existsCat) {
-            Category cat = repoCat.findByUsuarioAndCategoryName(usuario, idcr.getName());
+            Category cat = repoCat.findByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
             repoCat.deleteById(cat.getId());
-            res.put("statusText", "La categoría " + idcr.getName() + " ha sido eliminada correctamente.");
+            res.put("statusText", "La categoría " + idcr.getCategoryName() + " ha sido eliminada correctamente.");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
-            res.put("statusText", "La categoría " + idcr.getName() + " no existe.");
+            res.put("statusText", "La categoría " + idcr.getCategoryName() + " no existe.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
@@ -83,8 +88,7 @@ public class CatController {
     public List<CategoryResponse> listar(HttpServletRequest request)
             throws UserNotFoundException {
 
-        Long id = getUserIdFromRequest(request);
-        User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User usuario = getUserFromRequest(request);
 
         List<Category> categorias = repoCat.findByUsuario(usuario);
         List<CategoryResponse> response = new ArrayList<>();
@@ -92,7 +96,7 @@ public class CatController {
             response.add(new CategoryResponse(cat));
 
         return response;
-    }*/
+    }
 
 
 }

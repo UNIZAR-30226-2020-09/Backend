@@ -23,15 +23,6 @@ import static java.lang.Long.parseLong;
 
 public class TokenUtils {
 
-    /*
-     * Puede ser util, valorar dejarla así o que lance la excepcion UserNotFound
-
-    public static User getUserFromRequest(HttpServletRequest request, IUserRepo repo){
-        Long id = getUserIdFromRequest(request);
-        Optional<User> usuario = repo.findById(id);
-        return usuario.isPresent() ? usuario.get() : null;
-    }*/
-
     public static Long getUserIdFromRequest(HttpServletRequest request){
         final String authorization = request.getHeader("Authorization");
         //El 7 proviene de eliminar la cabecera "Bearer "

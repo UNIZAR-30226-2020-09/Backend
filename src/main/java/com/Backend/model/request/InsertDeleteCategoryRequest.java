@@ -1,6 +1,7 @@
 package com.Backend.model.request;
 
 import com.Backend.model.Category;
+import com.Backend.model.Password;
 import com.Backend.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,10 +14,10 @@ public class InsertDeleteCategoryRequest {
 
     @Getter
     @Setter
-    private String name;
+    private String categoryName;
 
     public boolean isValid(){
-        return name!=null;
+        return categoryName != null;
     }
 
 }

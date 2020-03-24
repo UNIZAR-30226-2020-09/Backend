@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import javax.persistence.*;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,11 +45,10 @@ public class Password {
     @OneToMany(mappedBy = "password")
     private Set<OwnsPassword> usersSet = new HashSet<>();
 
-    /*
-     * Decidir el tipo de dato de la fecha de expiración
-     * Existe tipo Date en java.
-     * Date expirationDate;
-     */
+    @Getter
+    @Setter
+    Date expirationDate;
+
 
     /* Relación 1:N con categoría, extremo de la N */
     public static final String COLUMN_CAT_NAME = "cat_id";
