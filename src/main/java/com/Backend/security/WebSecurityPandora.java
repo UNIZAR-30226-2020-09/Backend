@@ -11,10 +11,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.google.common.collect.ImmutableList;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import java.util.Collections;
 
 import static com.Backend.security.Constants.*;
 
@@ -27,6 +23,7 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
+                .antMatchers(HttpMethod.GET, ESTADISTICAS).permitAll()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()

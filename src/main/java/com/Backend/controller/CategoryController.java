@@ -63,6 +63,8 @@ public class CategoryController {
         }
     }
 
+    /*
+    ELIMINAR CATEGORÍA CON ID
     @DeleteMapping(ELIMINAR_CATEGORIA_URL)
     public ResponseEntity<JSONObject> eliminar(@RequestBody InsertDeleteCategoryRequest idcr,
                                                HttpServletRequest request) throws UserNotFoundException {
@@ -82,6 +84,7 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
+    */
 
     // MUY PROBABLE QUE HAYA QUE CAMBIAR EL FORMATO
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)

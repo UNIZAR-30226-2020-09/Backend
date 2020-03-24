@@ -8,6 +8,7 @@ public class Constants {
     public static final String REGISTRO_USUARIO_URL = "/api/usuarios/registro";
     public static final String CONSULTAR_TODOS_USUARIOS_URL = "/api/usuarios/consultarTodos";
     public static final String CONTACTO_URL = "/api/mensaje";
+    public static final String ESTADISTICAS = "/api/estadisticas";
 
     //Recomendable dejarlo así, según el estándar
     public static final String HEADER_AUTHORIZATION_KEY = "Authorization";
