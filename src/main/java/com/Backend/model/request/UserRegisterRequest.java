@@ -11,6 +11,7 @@ import lombok.Setter;
 public class UserRegisterRequest {
 
     @Getter
+    @Setter
     private String mail;
     @Getter
     @Setter
