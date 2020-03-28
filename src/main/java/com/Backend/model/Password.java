@@ -1,13 +1,11 @@
 package com.Backend.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -47,7 +45,7 @@ public class Password {
 
     @Getter
     @Setter
-    Date expirationDate;
+    Integer expirationTime;
 
 
     /* Relación 1:N con categoría, extremo de la N */
@@ -58,8 +56,9 @@ public class Password {
     @Setter
     private Category category;
 
-    public Password(String password, String passwordName) {
+    public Password(String password, String passwordName, Integer expirationTime) {
         this.password = password;
         this.passwordName = passwordName;
+        this.expirationTime = expirationTime;
     }
 }

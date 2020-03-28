@@ -95,7 +95,7 @@ public class UserController {
     public ResponseEntity<JSONObject> login(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (id != null && repo.existsById(id)){
+        if (repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             String token = getJWTToken(usuario);
 
@@ -115,9 +115,8 @@ public class UserController {
     public ResponseEntity<JSONObject>  consulta(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (id != null && repo.existsById(id)){
+        if (repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-
             res.put("statusText", "OK");
             res.put("user", new UserResponse(usuario));
             return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -137,19 +136,13 @@ public class UserController {
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (id != null) {
-            if (repo.existsById(id)) {
-                repo.deleteById(id);
-                res.put("statusText", "OK");
-                return ResponseEntity.status(HttpStatus.OK).body(res);
-            } else {
-
-                res.put("statusText", "BAD_REQUEST");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-            }
+        if (repo.existsById(id)) {
+            repo.deleteById(id);
+            res.put("statusText", "Usuario eliminado");
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
-            res.put("statusText", "UNAUTHORIZED");
+            res.put("statusText", "No autorizado");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
         }
     }

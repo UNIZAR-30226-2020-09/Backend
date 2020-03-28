@@ -5,6 +5,6 @@ public class UserNotFoundException extends Exception {
 
     public UserNotFoundException(Long id){
 
-        super("Usuario con mail: " + id.toString() + " no ha sido encontrado");
+        super("Usuario con id: " + id.toString() + " no ha sido encontrado");
     }
 }

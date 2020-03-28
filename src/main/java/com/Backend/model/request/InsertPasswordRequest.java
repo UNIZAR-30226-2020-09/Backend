@@ -14,15 +14,15 @@ public class InsertPasswordRequest {
     private String optionalText;
     @Getter @Setter
     private String userName;
-    //@Getter @Setter
-    //Date expirationDate;
+    @Getter @Setter
+    Integer expirationTime;
 
     public boolean isValid(){
-        return password != null && passwordName != null;
+        return password != null && passwordName != null && expirationTime != null;
     }
 
     public Password getAsPassword(){
-        Password pwd = new Password(password, passwordName);
+        Password pwd = new Password(password, passwordName, expirationTime);
         pwd.setOptionalText(optionalText);
         pwd.setUserName(userName);
         return pwd;

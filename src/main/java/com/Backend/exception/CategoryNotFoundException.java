@@ -5,6 +5,6 @@ public class CategoryNotFoundException extends Exception {
 
     public CategoryNotFoundException(Long id){
 
-        super("Usuario con id: " + id.toString() + " no ha sido encontrado");
+        super("Categoria con id: " + id.toString() + " no ha sido encontrada");
     }
 }
