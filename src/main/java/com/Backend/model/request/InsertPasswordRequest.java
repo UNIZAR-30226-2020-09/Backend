@@ -1,13 +1,21 @@
 package com.Backend.model.request;
 
+import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.model.Password;
+import com.Backend.repository.ICatRepo;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class InsertPasswordRequest {
 
+    @Autowired
+    ICatRepo repoCat;
+
     @Getter @Setter
     private String passwordName;
+    @Getter @Setter
+    private Long passwordCategoryId;
     @Getter @Setter
     private String password;
     @Getter @Setter
@@ -18,10 +26,10 @@ public class InsertPasswordRequest {
     Integer expirationTime;
 
     public boolean isValid(){
-        return password != null && passwordName != null && expirationTime != null;
+        return password != null && passwordName != null && expirationTime != null && passwordCategoryId != null;
     }
 
-    public Password getAsPassword(){
+    public Password getAsPassword() throws CategoryNotFoundException {
         Password pwd = new Password(password, passwordName, expirationTime);
         pwd.setOptionalText(optionalText);
         pwd.setUserName(userName);
