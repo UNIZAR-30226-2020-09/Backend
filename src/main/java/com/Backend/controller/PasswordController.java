@@ -67,14 +67,13 @@ public class PasswordController {
                 System.out.println((i.getPassword()).getPasswordName());
                 if((i.getPassword()).getPasswordName().equals(password.getPasswordName())){
                     res.put("statusText", "Ya existe una contraseña con el mismo nombre para el usuario");
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
                 }
             }
 
             repoPass.save(password);
             OwnsPassword ownsp = new OwnsPassword(user, password, 1);
             repoOwnsPass.save(ownsp);
-            res.put("statusText", "Contraseña insertada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         catch (CategoryNotFoundException e) {
@@ -91,7 +90,6 @@ public class PasswordController {
         Long idUser = getUserIdFromRequest(request);
         User user = repoUser.findById(idUser).orElseThrow(() -> new UserNotFoundException(idUser));
         JSONObject res = new JSONObject();
-
         List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
         int it = 1;
@@ -101,7 +99,6 @@ public class PasswordController {
             PasswordResponse pres = new PasswordResponse(i);
             JSONObject a = new JSONObject();
             a.put(Integer.toString(it), pres);
-            System.out.println(a);
             allpass.add(a);
             it += 1;
         }
@@ -110,9 +107,6 @@ public class PasswordController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    /*
-     * Método para eliminar usuario
-     */
     @DeleteMapping(ELIMINAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request,
                                                @RequestBody DeleteByIdRequest deleteIdReq) throws UserNotFoundException, PasswordNotFoundException {
@@ -136,11 +130,10 @@ public class PasswordController {
                 //No eres el usuario creador
                 repoOwnsPass.delete(ops);
             }
-            res.put("statusText", "Contraseña eliminada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } else{
             res.put("statusText", "No autorizado");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
