@@ -5,6 +5,7 @@ import com.Backend.model.Category;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
+import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IUserRepo;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -34,6 +35,8 @@ public class UserController {
 
     @Autowired
     IUserRepo repo;
+    @Autowired
+    ICatRepo repoCat;
 
     /*
      * Ejemplo de inserción de usuario, se recuerda que todos los atributos son necesarios.
@@ -51,8 +54,12 @@ public class UserController {
 
         } else {
             if (!repo.existsByMail(userRegReq.getMail())) {
+
                 userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
                 repo.save(userRegReq.getAsUser());
+                // Si no buscas un usuario con id falla la inserción.
+                User usuario = repo.findByMail(userRegReq.getMail());
+                repoCat.save(new Category("Sin categoría", usuario));
 
                 res.put("statusText", "El usuario ha sido insertado.");
                 return ResponseEntity.status(HttpStatus.OK).body(res);
