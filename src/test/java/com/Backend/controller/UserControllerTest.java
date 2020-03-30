@@ -212,6 +212,7 @@ class UserControllerTest {
                 HttpMethod.POST,entity, JSONObject.class);
 
         String token = response.getBody().getAsString("token");
+        System.out.println(token);
         HttpHeaders headersUser2 = headerFromToken(token);
 
         response = restTemplate.exchange(URI.create(url + "/api/usuarios/eliminar"),
