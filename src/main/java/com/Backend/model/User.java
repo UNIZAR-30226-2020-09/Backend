@@ -59,7 +59,7 @@ public class User {
     @OneToMany(mappedBy = "usuario")
     @Getter
     private Set<Category> categorySet = new HashSet<>();
-
+    
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;
         this.mail = mail;
