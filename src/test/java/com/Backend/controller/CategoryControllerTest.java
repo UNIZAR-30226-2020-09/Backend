@@ -1,10 +1,12 @@
 package com.Backend.controller;
 
 import com.Backend.BackendApplication;
+import com.Backend.model.Category;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.model.request.InsertDeleteCategoryRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -16,8 +18,10 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.net.URI;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
 import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
@@ -55,8 +59,15 @@ class CategoryControllerTest {
         token = "";
         cat1 = new InsertDeleteCategoryRequest("categ1");
         cat2 = new InsertDeleteCategoryRequest("categ2");
-        cat3 = new InsertDeleteCategoryRequest("categ3");
         emptyCat = new InsertDeleteCategoryRequest("");
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        TestRestTemplate restTemplateTearDown = new TestRestTemplate();
+        String url = "http://localhost:8080";
+        restTemplateTearDown.exchange(URI.create(url + "/api/usuarios/eliminar"),
+                HttpMethod.DELETE, new HttpEntity<>(tokenHeaders), JSONObject.class);
     }
 
     @Test
@@ -84,6 +95,7 @@ class CategoryControllerTest {
         assertNotEquals(sameMailResponse.getStatusCode(), response.getStatusCode());
     }
 
+    /*
     @Test
     @Order(3)
     void post_registro_BAD_REQUEST_2() throws JsonProcessingException {
@@ -92,15 +104,34 @@ class CategoryControllerTest {
         HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(emptyCat), tokenHeaders);
         ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + INSERTAR_CATEGORIA_URL, entity, JSONObject.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
+    }*/
 
     @Test
     @Order(4)
-    void get_listar_OK() throws JsonProcessingException{
+    void get_listar_OK() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         create_user_and_login();
 
         ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_CATEGORIAS_USUARIO_URL),
                 HttpMethod.GET, new HttpEntity<>(tokenHeaders), JSONObject.class);
+        ArrayList<Category> res = (ArrayList<Category>) response.getBody().get("categories");
+        JSONObject cat = new JSONObject((Map<String, ?>) res.get(0));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("categ1", cat.get("categoryName"));
+    }
+
+    @Test
+    @Order(5)
+    void delete_eliminar_OK() throws JsonProcessingException {
+        create_user_and_login();
+
+        HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat2), tokenHeaders);
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
+                HttpMethod.DELETE, entity, JSONObject.class);
+
+        entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat1), tokenHeaders);
+        response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
+                HttpMethod.DELETE, entity, JSONObject.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -115,6 +146,11 @@ class CategoryControllerTest {
             token = response.getBody().getAsString("token");
             tokenHeaders = headerFromToken(token);
         }
+    }
+
+    void remove_user() throws JsonProcessingException {
+        restTemplate.exchange(URI.create(url + "/api/usuarios/eliminar"),
+                HttpMethod.DELETE, new HttpEntity<>(tokenHeaders), JSONObject.class);
     }
 
     // Genera la cabecera a partir de un token devuelto por PandoraApp
