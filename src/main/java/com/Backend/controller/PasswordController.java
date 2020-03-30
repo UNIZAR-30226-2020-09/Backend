@@ -62,7 +62,7 @@ public class PasswordController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
         try{
-            User usuario = getUserFromRequest(request);
+            User user = getUserFromRequest(request);
             Password password = passReq.getAsPassword();
             password.setCategory(repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId())));
 
@@ -99,7 +99,7 @@ public class PasswordController {
 
         JSONObject res = new JSONObject();
         try {
-            User usuario = getUserFromRequest(request);
+            User user = getUserFromRequest(request);
 
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             List<String> allpass = new ArrayList<>();
@@ -129,10 +129,10 @@ public class PasswordController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
         try {
-            User usuario = getUserFromRequest(request);
+            User user = getUserFromRequest(request);
 
             Long idPass = deleteIdReq.getId();
-            Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idUser));
+            Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idPass));
             OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
 
             if (ops.getRol() == 1) {
