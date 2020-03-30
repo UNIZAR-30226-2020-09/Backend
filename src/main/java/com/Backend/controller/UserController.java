@@ -38,20 +38,13 @@ public class UserController {
     @Autowired
     ICatRepo repoCat;
 
-    /*
-     * Ejemplo de inserción de usuario, se recuerda que todos los atributos son necesarios.
-     * Habrá que personalizar los atributos dandoles una longitud etc...
-     * Cuando no todos los atributos sean obligatorios añadir required = false junto al name.
-     * se puede hacer que devuelva algún JSON que confirme o deniegue la correcta inserción
-     */
     @PostMapping(REGISTRO_USUARIO_URL)
     public ResponseEntity<JSONObject> registro(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
+
         if (!userRegReq.isValid()) {
-
-            res.put("statusText", "Faltan campos.");
+            res.put("statusText", "Los campos no pueden queda vacíos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-
         } else {
             if (!repo.existsByMail(userRegReq.getMail())) {
 
@@ -60,8 +53,6 @@ public class UserController {
                 // Si no buscas un usuario con id falla la inserción.
                 User usuario = repo.findByMail(userRegReq.getMail());
                 repoCat.save(new Category("Sin categoría", usuario));
-
-                res.put("statusText", "El usuario ha sido insertado.");
                 return ResponseEntity.status(HttpStatus.OK).body(res);
 
             } else {
@@ -71,9 +62,6 @@ public class UserController {
         }
     }
 
-    /*
-     * Falta adaptar los códigos de respuesta
-     */
     @PostMapping(LOGIN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
@@ -84,7 +72,6 @@ public class UserController {
 
             if (b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
                 String token = getJWTToken(recuperado);
-                res.put("statusText", "Sesión iniciada.");
                 res.put("token", token);
                 return ResponseEntity.status(HttpStatus.OK).body(res);
             } else {
@@ -97,9 +84,6 @@ public class UserController {
         }
     }
 
-    /*
-     *
-     */
     @GetMapping(TOKEN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
@@ -107,8 +91,6 @@ public class UserController {
         if (repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             String token = getJWTToken(usuario);
-
-            res.put("statusText", "OK");
             res.put("token", token);
             return ResponseEntity.status(HttpStatus.OK).body(res);
 
@@ -117,67 +99,45 @@ public class UserController {
         }
     }
 
-    /*
-     * Devuelve si existe un JSON con la info del usuario, en caso contrario lanza excepcion
-     */
     @GetMapping(CONSULTAR_USUARIO_URL)
     public ResponseEntity<JSONObject>  consulta(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (repo.existsById(id)){
             User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            res.put("statusText", "OK");
             res.put("user", new UserResponse(usuario));
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
 
             res.put("statusText", "UNAUTHORIZED");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
-
-    /*
-     * Método para eliminar usuario
-     */
     @DeleteMapping(ELIMINAR_USUARIO_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (repo.existsById(id)) {
             repo.deleteById(id);
-            res.put("statusText", "Usuario eliminado");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         else{
             res.put("statusText", "No autorizado");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
-    /*
-     * Método para logout
-     */
 
-
-
-    /*
-     * Devuelve la información de todos los usuarios de la base de datos
-     * SOLO CON PROPOSITO DE DEBUG
-     */
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
     public ResponseEntity<JSONObject> all() {
         List<User> listaUsers = repo.findAll();
-
         JSONArray array = new JSONArray();
-
         for (User u : listaUsers)
             array.add(new UserResponse(u));
-
         JSONObject res = new JSONObject();
         res.put("users", array);
-
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }

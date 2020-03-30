@@ -16,21 +16,16 @@ public class MensajeController {
     @Autowired
     IMensajeRepo repo;
 
-    /*
-     * Operación que recibe los formularios de contacto y los inserta en la base de datos.
-     */
-    @CrossOrigin
     @PostMapping(CONTACTO_URL)
     public ResponseEntity<JSONObject> contactar(@RequestBody MessageRequest msgReq){
         JSONObject res = new JSONObject();
 
         if(msgReq.isValid()){
             repo.save(msgReq.getAsMessage());
-            res.put("statusText", "OK, Mensaje insertado correctamente.");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
             res.put("statusText", "BAD_REQUEST, Error al guardar el mensaje.");
-            return ResponseEntity.status(HttpStatus.OK).body(res);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 }
