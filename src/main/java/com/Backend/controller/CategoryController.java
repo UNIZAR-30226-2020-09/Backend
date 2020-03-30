@@ -95,6 +95,7 @@ public class CategoryController {
 
         List<Category> categorias = repoCat.findByUsuario(usuario);
         List<CategoryResponse> response = new ArrayList<>();
+
         for (Category cat : categorias)
             response.add(new CategoryResponse(cat));
 
