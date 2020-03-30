@@ -18,6 +18,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -85,17 +86,24 @@ public class PasswordController {
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
-            throws UserNotFoundException, PasswordNotFoundException {
+            throws UserNotFoundException {
 
         Long idUser = getUserIdFromRequest(request);
         User user = repoUser.findById(idUser).orElseThrow(() -> new UserNotFoundException(idUser));
         JSONObject res = new JSONObject();
 
         List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-        List<PasswordResponse> allpass = new ArrayList<>();
+
+        int it = 1;
+
+        JSONArray allpass = new JSONArray();
         for (OwnsPassword i:allops){
             PasswordResponse pres = new PasswordResponse(i);
-            allpass.add(pres);
+            JSONObject a = new JSONObject();
+            a.put(Integer.toString(it), pres);
+            System.out.println(a);
+            allpass.add(a);
+            it += 1;
         }
 
         res.put("passwords", allpass);
