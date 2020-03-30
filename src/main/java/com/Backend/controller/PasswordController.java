@@ -3,6 +3,7 @@ package com.Backend.controller;
 import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.PasswordNotFoundException;
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
@@ -13,6 +14,8 @@ import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import lombok.Getter;
+import lombok.Setter;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,20 +92,24 @@ public class PasswordController {
 
         Long idUser = getUserIdFromRequest(request);
         User user = repoUser.findById(idUser).orElseThrow(() -> new UserNotFoundException(idUser));
-        JSONObject res = new JSONObject();
         List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
-        int it = 1;
-
         JSONArray allpass = new JSONArray();
+
         for (OwnsPassword i:allops){
             PasswordResponse pres = new PasswordResponse(i);
             JSONObject a = new JSONObject();
-            a.put(Integer.toString(it), pres);
+            a.put("passId", pres.getPassId());
+            a.put("passwordName", pres.getPasswordName());
+            a.put("catId", pres.getCatId());
+            a.put("categoryName", pres.getCategoryName());
+            a.put("rol", pres.getRol());
+            a.put("optionalText",pres.getOptionalText());
+            a.put("userName", pres.getUserName());
             allpass.add(a);
-            it += 1;
         }
 
+        JSONObject res = new JSONObject();
         res.put("passwords", allpass);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }

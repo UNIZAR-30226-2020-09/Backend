@@ -91,16 +91,21 @@ public class CategoryController {
             throws UserNotFoundException {
 
         User usuario = getUserFromRequest(request);
-
         List<Category> categorias = repoCat.findByUsuario(usuario);
 
-        JSONArray array = new JSONArray();
-        for (Category cat : categorias)
-            array.add(new CategoryResponse(cat));
+        JSONArray jsa = new JSONArray();
+
+        for (Category cat : categorias) {
+            JSONObject obj = new JSONObject();
+            obj.put("catId", cat.getId());
+            obj.put("categoryName", cat.getCategoryName());
+            jsa.add(obj);
+        }
 
         JSONObject res = new JSONObject();
-        res.put("categories", array);
 
+        System.out.println(res.toString());
+        res.put("categories", jsa);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
