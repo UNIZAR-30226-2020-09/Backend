@@ -23,7 +23,7 @@ public class InsertPasswordRequest {
     Integer expirationTime;
 
     public boolean isValid(){
-        return password != null && passwordName != null && expirationTime != null;
+        return password != null && passwordName != null && expirationTime != null && passwordCategoryId != null;
     }
 
     public Password getAsPassword() {

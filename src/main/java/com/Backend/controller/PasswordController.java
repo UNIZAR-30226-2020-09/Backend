@@ -45,19 +45,26 @@ public class PasswordController {
     @Autowired
     ICatRepo repoCat;
 
+    public User getUserFromRequest(HttpServletRequest request) throws UserNotFoundException{
+        Long id = getUserIdFromRequest(request);
+        User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return usuario;
+    }
 
     @PostMapping(INSERTAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
                                                @RequestBody InsertPasswordRequest passReq)
             throws UserNotFoundException {
 
-        Long userID = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
+        if(!passReq.isValid()){
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
         try{
-
+            User usuario = getUserFromRequest(request);
             Password password = passReq.getAsPassword();
             password.setCategory(repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId())));
-            User user = repoUser.findById(userID).orElseThrow(() -> new UserNotFoundException(userID));
 
             //Se comprueba que el usuario no tiene una contraseña con el mismo nombre
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
@@ -75,6 +82,10 @@ public class PasswordController {
             res.put("statusText", "Contraseña insertada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
         catch (CategoryNotFoundException e) {
             e.printStackTrace();
             res.put("statusText", "Categoría no encontrada.");
@@ -86,21 +97,23 @@ public class PasswordController {
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
             throws UserNotFoundException, PasswordNotFoundException {
 
-        Long idUser = getUserIdFromRequest(request);
-        User user = repoUser.findById(idUser).orElseThrow(() -> new UserNotFoundException(idUser));
         JSONObject res = new JSONObject();
+        try {
+            User usuario = getUserFromRequest(request);
 
-        List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-        List<String> allpass = new ArrayList<>();
-        for (OwnsPassword i:allops){
-            PasswordResponse pres = new PasswordResponse(i);
-            allpass.add(pres.toString());
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+            List<String> allpass = new ArrayList<>();
+            for (OwnsPassword i : allops) {
+                PasswordResponse pres = new PasswordResponse(i);
+                allpass.add(pres.toString());
+            }
+            res.put("passwords", allpass);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         }
-        res.put("passwords", allpass);
-        res.put("statusText", "Contraseñas encontradas");
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-
-
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
     }
 
     /*
@@ -109,31 +122,42 @@ public class PasswordController {
     @DeleteMapping(ELIMINAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request,
                                                @RequestBody DeleteByIdRequest deleteIdReq) throws UserNotFoundException, PasswordNotFoundException {
-        Long idUser = getUserIdFromRequest(request);
-        User user = repoUser.findById(idUser).orElseThrow(() -> new UserNotFoundException(idUser));
+
         JSONObject res = new JSONObject();
-        if (deleteIdReq.isValid()) {
+        if(!deleteIdReq.isValid()){
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        try {
+            User usuario = getUserFromRequest(request);
+
             Long idPass = deleteIdReq.getId();
             Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idUser));
-            OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password,user);
+            OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
 
-            if (ops.getRol() == 1){
+            if (ops.getRol() == 1) {
                 //Eres el usuario creador
                 List<OwnsPassword> allops;
                 allops = repoOwnsPass.findAllByPassword(password);
-                for (OwnsPassword i:allops){
+                for (OwnsPassword i : allops) {
                     repoOwnsPass.delete(i);
                 }
                 repoPass.delete(password);
-            } else{
+            } else {
                 //No eres el usuario creador
                 repoOwnsPass.delete(ops);
             }
             res.put("statusText", "Contraseña eliminada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else{
-            res.put("statusText", "No autorizado");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+
+        }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        catch(PasswordNotFoundException e){
+            res.put("statusText", "Contraseña no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
