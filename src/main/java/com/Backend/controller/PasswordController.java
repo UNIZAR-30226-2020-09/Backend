@@ -13,6 +13,7 @@ import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -91,16 +92,14 @@ public class PasswordController {
         JSONObject res = new JSONObject();
 
         List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-        List<String> allpass = new ArrayList<>();
+        List<PasswordResponse> allpass = new ArrayList<>();
         for (OwnsPassword i:allops){
             PasswordResponse pres = new PasswordResponse(i);
-            allpass.add(pres.toString());
+            allpass.add(pres);
         }
+
         res.put("passwords", allpass);
-        res.put("statusText", "Contraseñas encontradas");
         return ResponseEntity.status(HttpStatus.OK).body(res);
-
-
     }
 
     /*
