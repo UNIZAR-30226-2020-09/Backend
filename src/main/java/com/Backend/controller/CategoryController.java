@@ -7,7 +7,9 @@ import com.Backend.model.request.InsertDeleteCategoryRequest;
 import com.Backend.model.response.CategoryResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IUserRepo;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+//import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,8 +65,6 @@ public class CategoryController {
         }
     }
 
-    /*
-    ELIMINAR CATEGORÍA CON ID
     @DeleteMapping(ELIMINAR_CATEGORIA_URL)
     public ResponseEntity<JSONObject> eliminar(@RequestBody InsertDeleteCategoryRequest idcr,
                                                HttpServletRequest request) throws UserNotFoundException {
@@ -84,21 +84,24 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
-    */
 
     // MUY PROBABLE QUE HAYA QUE CAMBIAR EL FORMATO
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
-    public List<CategoryResponse> listar(HttpServletRequest request)
+    public ResponseEntity<JSONObject> listar(HttpServletRequest request)
             throws UserNotFoundException {
 
         User usuario = getUserFromRequest(request);
 
         List<Category> categorias = repoCat.findByUsuario(usuario);
-        List<CategoryResponse> response = new ArrayList<>();
-        for (Category cat : categorias)
-            response.add(new CategoryResponse(cat));
 
-        return response;
+        JSONArray array = new JSONArray();
+        for (Category cat : categorias)
+            array.add(new CategoryResponse(cat));
+
+        JSONObject res = new JSONObject();
+        res.put("categories", array);
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
 

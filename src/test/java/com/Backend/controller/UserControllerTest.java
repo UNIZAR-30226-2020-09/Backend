@@ -196,6 +196,14 @@ class UserControllerTest {
 
     @Test
     @Order(12)
+    void get_consulta_todos_OK() {
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + "/api/usuarios/consultarTodos"),
+                HttpMethod.GET, new HttpEntity<>(basicHeaders), JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @Order(13)
     //Deja la bbdd en su estado original
     void delete_eliminar_OK_2() throws JsonProcessingException {
 

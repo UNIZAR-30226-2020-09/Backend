@@ -1,10 +1,12 @@
 package com.Backend.controller;
 
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.Category;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
 import com.Backend.repository.IUserRepo;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -158,13 +160,17 @@ public class UserController {
      * SOLO CON PROPOSITO DE DEBUG
      */
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
-    public List<UserResponse> all() {
+    public ResponseEntity<JSONObject> all() {
         List<User> listaUsers = repo.findAll();
-        List<UserResponse> listaRespuesta = new ArrayList<>();
 
-        for(User u : listaUsers)
-            listaRespuesta.add(new UserResponse(u));
+        JSONArray array = new JSONArray();
 
-        return listaRespuesta;
+        for (User u : listaUsers)
+            array.add(new UserResponse(u));
+
+        JSONObject res = new JSONObject();
+        res.put("users", array);
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }
