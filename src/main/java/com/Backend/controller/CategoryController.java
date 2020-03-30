@@ -49,18 +49,25 @@ public class CategoryController {
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
                                                @RequestBody InsertDeleteCategoryRequest idcr)
             throws UserNotFoundException{
-
-        User usuario = getUserFromRequest(request);
         JSONObject res = new JSONObject();
+        try {
+            User usuario = getUserFromRequest(request);
+            if (!idcr.isValid()) {
+                res.put("statusText", "Los campos no pueden quedar vacíos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
 
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
-
-        if (!existsCat) {
+            Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
+            if (existsCat) {
+                res.put("statusText", "Ya existe una categoría con ese nombre");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
             repoCat.save(new Category(idcr.getCategoryName(), usuario));
             res.put("statusText", "Categoría creada correctamente");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            res.put("statusText", "Ya existe una categoría con ese nombre");
+        }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
@@ -69,39 +76,49 @@ public class CategoryController {
     public ResponseEntity<JSONObject> eliminar(@RequestBody InsertDeleteCategoryRequest idcr,
                                                HttpServletRequest request) throws UserNotFoundException {
 
-        User usuario = getUserFromRequest(request);
         JSONObject res = new JSONObject();
-
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
-
-        if (existsCat) {
+        try {
+            User usuario = getUserFromRequest(request);
+            if (!idcr.isValid()) {
+                res.put("statusText", "Los campos no pueden quedar vacíos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
+            Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
+            if (!existsCat) {
+                res.put("statusText", "La categoría " + idcr.getCategoryName() + " no existe.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
             Category cat = repoCat.findByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
             repoCat.deleteById(cat.getId());
             res.put("statusText", "La categoría " + idcr.getCategoryName() + " ha sido eliminada correctamente.");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            res.put("statusText", "La categoría " + idcr.getCategoryName() + " no existe.");
+        }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
 
-    // MUY PROBABLE QUE HAYA QUE CAMBIAR EL FORMATO
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
             throws UserNotFoundException {
 
-        User usuario = getUserFromRequest(request);
-
-        List<Category> categorias = repoCat.findByUsuario(usuario);
-
-        JSONArray array = new JSONArray();
-        for (Category cat : categorias)
-            array.add(new CategoryResponse(cat));
-
         JSONObject res = new JSONObject();
-        res.put("categories", array);
+        try {
+            User usuario = getUserFromRequest(request);
+            List<Category> categorias = repoCat.findByUsuario(usuario);
 
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+            JSONArray array = new JSONArray();
+            for (Category cat : categorias)
+                array.add(new CategoryResponse(cat));
+
+            res.put("categories", array);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+        }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
     }
 
 
