@@ -8,6 +8,7 @@ import com.Backend.model.request.DeleteByIdRequest;
 import com.Backend.model.request.InsertCategoryRequest;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IUserRepo;
+import com.Backend.utils.CategoryUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,6 @@ public class CategoryController {
     public static final String ELIMINAR_CATEGORIA_URL = "/api/categorias/eliminar";
     public static final String LISTAR_CATEGORIAS_USUARIO_URL = "/api/categorias/listar";
 
-    /*
-     * Anota warning "débil", según he leído hacer autowired a un atributo que es una interfaz
-     * provoca una implementación en la instanciación de la clase. Inyección de atributos
-     */
     @Autowired
     ICatRepo repoCat;
 
@@ -93,23 +90,14 @@ public class CategoryController {
     }
 
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
-    public ResponseEntity<JSONObject> listar(HttpServletRequest request)
+    public ResponseEntity<JSONObject> listarEditables(HttpServletRequest request)
             throws UserNotFoundException {
         User usuario = getUserFromRequest(request);
         List<Category> categorias = repoCat.findByUsuario(usuario);
 
-        JSONArray jsa = new JSONArray();
-
-        for (Category cat : categorias) {
-            JSONObject obj = new JSONObject();
-            obj.put("catId", cat.getId());
-            obj.put("categoryName", cat.getCategoryName());
-            jsa.add(obj);
-        }
+        JSONArray jsa = CategoryUtils.arrayCategorias(categorias, true);
 
         JSONObject res = new JSONObject();
-
-        System.out.println(res.toString());
         res.put("categories", jsa);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
