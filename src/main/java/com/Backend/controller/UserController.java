@@ -43,92 +43,82 @@ public class UserController {
         JSONObject res = new JSONObject();
 
         if (!userRegReq.isValid()) {
-            res.put("statusText", "Los campos no pueden queda vacíos.");
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-        } else {
-            if (!repo.existsByMail(userRegReq.getMail())) {
-
-                userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
-                repo.save(userRegReq.getAsUser());
-                // Si no buscas un usuario con id falla la inserción.
-                User usuario = repo.findByMail(userRegReq.getMail());
-                repoCat.save(new Category("Sin categoría", usuario));
-                return ResponseEntity.status(HttpStatus.OK).body(res);
-
-            } else {
-                res.put("statusText", "El email ya está asociado a una cuenta.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-            }
         }
+        if (repo.existsByMail(userRegReq.getMail())) {
+            res.put("statusText", "El email ya está asociado a una cuenta.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
+        repo.save(userRegReq.getAsUser());
+        // Si no buscas un usuario con id falla la inserción.
+        User usuario = repo.findByMail(userRegReq.getMail());
+        repoCat.save(new Category("Sin categoría", usuario));
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @PostMapping(LOGIN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
-        if (userRegReq.isValid() && repo.existsByMail(userRegReq.getMail())) {
+        if (!userRegReq.isValid()){
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        if(!repo.existsByMail(userRegReq.getMail())) {
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        User recuperado = repo.findByMail(userRegReq.getMail());
+        BCryptPasswordEncoder b = new BCryptPasswordEncoder();
 
-            User recuperado = repo.findByMail(userRegReq.getMail());
-            BCryptPasswordEncoder b = new BCryptPasswordEncoder();
-
-            if (b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
-                String token = getJWTToken(recuperado);
-                res.put("token", token);
-                return ResponseEntity.status(HttpStatus.OK).body(res);
-            } else {
-                res.put("statusText", "Credenciales incorrectos");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
-            }
-        } else {
+        if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
             res.put("statusText", "Credenciales incorrectos");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
+        String token = getJWTToken(recuperado);
+        res.put("token", token);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping(TOKEN_USUARIO_URL)
-    public ResponseEntity<JSONObject> login(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject> token(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (repo.existsById(id)){
-            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            String token = getJWTToken(usuario);
-            res.put("token", token);
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-
-        } else {
+        if (!repo.existsById(id)) {
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        String token = getJWTToken(usuario);
+        res.put("token", token);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping(CONSULTAR_USUARIO_URL)
-    public ResponseEntity<JSONObject>  consulta(HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject> consulta(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (repo.existsById(id)){
-            User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            res.put("user", new UserResponse(usuario));
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        }
-        else{
-
-            res.put("statusText", "UNAUTHORIZED");
+        if (!repo.existsById(id)){
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
+        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        res.put("user", new UserResponse(usuario));
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @DeleteMapping(ELIMINAR_USUARIO_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (repo.existsById(id)) {
-            repo.deleteById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        }
-        else{
-            res.put("statusText", "No autorizado");
+        if (!repo.existsById(id)) {
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
+        repo.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
-
 
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)
     public ResponseEntity<JSONObject> all() {
