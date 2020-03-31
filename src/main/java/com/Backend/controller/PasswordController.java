@@ -69,7 +69,6 @@ public class PasswordController {
             //Se comprueba que el usuario no tiene una contraseña con el mismo nombre
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             for (OwnsPassword i:allops){
-                System.out.println((i.getPassword()).getPasswordName());
                 if((i.getPassword()).getPasswordName().equals(password.getPasswordName())){
                     res.put("statusText", "Ya existe una contraseña con el mismo nombre para el usuario");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);

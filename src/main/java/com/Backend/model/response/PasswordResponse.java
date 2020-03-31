@@ -28,20 +28,6 @@ public class PasswordResponse implements Serializable {
     @Getter @Setter
     String userName;
 
-    @Override
-    public String toString() {
-        return "PasswordResponse{" +
-                "repoOwnsPass=" + repoOwnsPass +
-                ", passId=" + passId +
-                ", passwordName='" + passwordName + '\'' +
-                ", catId=" + catId +
-                ", categoryName='" + categoryName + '\'' +
-                ", rol=" + rol +
-                ", optionalText='" + optionalText + '\'' +
-                ", userName='" + userName + '\'' +
-                '}';
-    }
-
     public PasswordResponse(OwnsPassword ops){
 
         this.passId = ops.getPassword().getId();
