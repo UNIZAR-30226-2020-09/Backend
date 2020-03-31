@@ -101,7 +101,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping(MODIFICAR_CATEGORIAS_USUARIO_URL)
+    @PostMapping(MODIFICAR_CATEGORIAS_USUARIO_URL)
     public ResponseEntity<JSONObject> modificar(@RequestBody ModifyCategory modCat,
                                                 HttpServletRequest request) throws UserNotFoundException {
 
@@ -113,6 +113,7 @@ public class CategoryController {
             }
             else {
                 cat.setCategoryName(modCat.getCategoryName());
+                repoCat.save(cat);
                 return peticionCorrecta();
             }
         } else

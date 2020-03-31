@@ -20,6 +20,7 @@ public class PasswordUtils {
 
         for(Password pass : passwords){
             pass.setCategory(sinCat);
+            repoPass.save(pass);
         }
     }
 }
