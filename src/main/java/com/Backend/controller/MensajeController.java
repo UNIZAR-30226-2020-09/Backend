@@ -19,13 +19,11 @@ public class MensajeController {
     @PostMapping(CONTACTO_URL)
     public ResponseEntity<JSONObject> contactar(@RequestBody MessageRequest msgReq){
         JSONObject res = new JSONObject();
-
-        if(msgReq.isValid()){
-            repo.save(msgReq.getAsMessage());
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            res.put("statusText", "BAD_REQUEST, Error al guardar el mensaje.");
+        if(!msgReq.isValid()){
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
+        repo.save(msgReq.getAsMessage());
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }

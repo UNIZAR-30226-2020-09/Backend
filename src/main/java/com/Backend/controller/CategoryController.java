@@ -51,18 +51,25 @@ public class CategoryController {
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
                                                @RequestBody InsertCategoryRequest idcr)
             throws UserNotFoundException{
-
-        User usuario = getUserFromRequest(request);
         JSONObject res = new JSONObject();
+        try {
+            User usuario = getUserFromRequest(request);
+            if (!idcr.isValid()) {
+                res.put("statusText", "Los campos no pueden quedar vacíos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
 
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
-
-        if (!existsCat) {
+            Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
+            if (existsCat) {
+                res.put("statusText", "Ya existe una categoría con ese nombre");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            }
             repoCat.save(new Category(idcr.getCategoryName(), usuario));
             res.put("statusText", "Categoría creada correctamente");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            res.put("statusText", "Ya existe una categoría con ese nombre");
+        }
+        catch(UserNotFoundException e){
+            res.put("statusText", "Usuario no existente");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
@@ -88,7 +95,6 @@ public class CategoryController {
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
             throws UserNotFoundException {
-
         User usuario = getUserFromRequest(request);
         List<Category> categorias = repoCat.findByUsuario(usuario);
 
