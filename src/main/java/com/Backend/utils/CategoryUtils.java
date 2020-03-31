@@ -1,6 +1,8 @@
 package com.Backend.utils;
 
 import com.Backend.model.Category;
+import com.Backend.model.User;
+import com.Backend.repository.ICatRepo;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
@@ -17,5 +19,11 @@ public class CategoryUtils {
             jsa.add(obj);
         }
         return jsa;
+    }
+
+    //Primera en crearse al crear usuario, menor id
+    public static Category getSinCategoria(ICatRepo repoCat, User usuario) {
+        List<Category> categorias = repoCat.findByUsuarioOrderByIdAsc(usuario);
+        return categorias.get(0);
     }
 }
