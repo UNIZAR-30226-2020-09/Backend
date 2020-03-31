@@ -25,6 +25,7 @@ import java.util.List;
 import static com.Backend.utils.CategoryUtils.getSinCategoria;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.TokenUtils.getUserFromRequest;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
@@ -45,16 +46,11 @@ public class CategoryController {
     @Autowired
     IPassRepo repoPass;
 
-    public User getUserFromRequest(HttpServletRequest request) throws UserNotFoundException{
-        Long id = getUserIdFromRequest(request);
-        return repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-    }
-
     @PostMapping(INSERTAR_CATEGORIA_URL)
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
                                                @RequestBody InsertCategoryRequest idcr){
         try {
-            User usuario = getUserFromRequest(request);
+            User usuario = getUserFromRequest(request, repoUser);
             if (!idcr.isValid())
                 return peticionErronea("Los campos no pueden quedar vacíos.");
 
@@ -74,7 +70,7 @@ public class CategoryController {
     public ResponseEntity<JSONObject> eliminar(@RequestBody DeleteByIdRequest del,
                                                HttpServletRequest request) throws UserNotFoundException {
 
-        User usuario = getUserFromRequest(request);
+        User usuario = getUserFromRequest(request, repoUser);
         try {
             Category cat = repoCat.findById(del.getId()).orElseThrow(() -> new CategoryNotFoundException(del.getId()));
             if (cat.getUsuario().getId().equals(usuario.getId()) && !cat.equals(getSinCategoria(repoCat, usuario))) {
@@ -91,7 +87,7 @@ public class CategoryController {
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
     public ResponseEntity<JSONObject> listarEditables(HttpServletRequest request)
             throws UserNotFoundException {
-        User usuario = getUserFromRequest(request);
+        User usuario = getUserFromRequest(request, repoUser);
         List<Category> categorias = repoCat.findByUsuario(usuario);
 
         JSONArray jsa = CategoryUtils.arrayCategorias(categorias, true);
@@ -105,7 +101,7 @@ public class CategoryController {
     public ResponseEntity<JSONObject> modificar(@RequestBody ModifyCategory modCat,
                                                 HttpServletRequest request) throws UserNotFoundException {
 
-        User usuario = getUserFromRequest(request);
+        User usuario = getUserFromRequest(request, repoUser);
         if(modCat.isValid()) {
             Category cat = repoCat.findByUsuarioAndId(usuario, modCat.getId());
             if(cat.equals(getSinCategoria(repoCat,usuario))) {

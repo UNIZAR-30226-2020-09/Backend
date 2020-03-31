@@ -23,6 +23,11 @@ import static java.lang.Long.parseLong;
 
 public class TokenUtils {
 
+    public static User getUserFromRequest(HttpServletRequest request, IUserRepo repoUser) throws UserNotFoundException{
+        Long id = getUserIdFromRequest(request);
+        return repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
     public static Long getUserIdFromRequest(HttpServletRequest request){
         final String authorization = request.getHeader("Authorization");
         //El 7 proviene de eliminar la cabecera "Bearer "

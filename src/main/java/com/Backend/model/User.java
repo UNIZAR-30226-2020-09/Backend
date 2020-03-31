@@ -51,7 +51,7 @@ public class User {
      * @OneToMany( mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true) ¿En cascada?
      * Relación 1:N con la tabla entre User y Password, extremo del 1
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     @Getter
     private Set<OwnsPassword> passwordSet = new HashSet<>();
 

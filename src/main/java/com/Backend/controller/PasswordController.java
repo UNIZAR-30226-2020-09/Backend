@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.TokenUtils.getUserFromRequest;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
@@ -35,21 +37,12 @@ public class PasswordController {
 
     @Autowired
     IPassRepo repoPass;
-
     @Autowired
     IUserRepo repoUser;
-
     @Autowired
     IOwnsPassRepo repoOwnsPass;
-
     @Autowired
     ICatRepo repoCat;
-
-    public User getUserFromRequest(HttpServletRequest request) throws UserNotFoundException{
-        Long id = getUserIdFromRequest(request);
-        User usuario = repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        return usuario;
-    }
 
     @PostMapping(INSERTAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
@@ -58,11 +51,10 @@ public class PasswordController {
 
         JSONObject res = new JSONObject();
         if(!passReq.isValid()){
-            res.put("statusText", "Los campos no pueden quedar vacíos.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Los campos no pueden quedar vacíos.");
         }
         try{
-            User user = getUserFromRequest(request);
+            User user = getUserFromRequest(request, repoUser);
             Password password = passReq.getAsPassword();
             password.setCategory(repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId())));
 
@@ -70,8 +62,7 @@ public class PasswordController {
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             for (OwnsPassword i:allops){
                 if((i.getPassword()).getPasswordName().equals(password.getPasswordName())){
-                    res.put("statusText", "Ya existe una contraseña con el mismo nombre para el usuario");
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+                    return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 }
             }
 
@@ -81,13 +72,10 @@ public class PasswordController {
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         catch(UserNotFoundException e){
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Usuario no existente.");
         }
         catch (CategoryNotFoundException e) {
-            e.printStackTrace();
-            res.put("statusText", "Categoría no encontrada.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Categoría no encontrada.");
         }
     }
 
@@ -97,7 +85,7 @@ public class PasswordController {
 
         JSONObject res = new JSONObject();
         try {
-            User user = getUserFromRequest(request);
+            User user = getUserFromRequest(request,repoUser);
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
             JSONArray allpass = new JSONArray();
@@ -119,8 +107,7 @@ public class PasswordController {
 
         }
         catch(UserNotFoundException e){
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Usuario no existente.");
         }
     }
 
@@ -134,7 +121,7 @@ public class PasswordController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
         try {
-            User user = getUserFromRequest(request);
+            User user = getUserFromRequest(request, repoUser);
 
             Long idPass = deleteIdReq.getId();
             Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idPass));

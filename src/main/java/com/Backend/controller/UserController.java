@@ -2,10 +2,13 @@ package com.Backend.controller;
 
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
+import com.Backend.model.OwnsPassword;
 import com.Backend.model.User;
 import com.Backend.model.request.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
 import com.Backend.repository.ICatRepo;
+import com.Backend.repository.IOwnsPassRepo;
+import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -20,8 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.Backend.security.Constants.*;
-import static com.Backend.utils.TokenUtils.getJWTToken;
-import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
+import static com.Backend.utils.JsonUtils.peticionCorrecta;
+import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.PasswordUtils.modifyPasswordsAtCategoryDelete;
+import static com.Backend.utils.TokenUtils.*;
 
 @RestController
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS})
@@ -37,44 +42,42 @@ public class UserController {
     IUserRepo repo;
     @Autowired
     ICatRepo repoCat;
+    @Autowired
+    IPassRepo repoPass;
+    @Autowired
+    IOwnsPassRepo repoOwns;
 
     @PostMapping(REGISTRO_USUARIO_URL)
     public ResponseEntity<JSONObject> registro(@RequestBody UserRegisterRequest userRegReq) {
-        JSONObject res = new JSONObject();
 
         if (!userRegReq.isValid()) {
-            res.put("statusText", "Los campos no pueden quedar vacíos.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Los campos no pueden quedar vacíos.");
         }
         if (repo.existsByMail(userRegReq.getMail())) {
-            res.put("statusText", "El email ya está asociado a una cuenta.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("El email ya está asociado a una cuenta.");
         }
         userRegReq.setMasterPassword(new BCryptPasswordEncoder().encode(userRegReq.getMasterPassword()));
         repo.save(userRegReq.getAsUser());
         // Si no buscas un usuario con id falla la inserción.
         User usuario = repo.findByMail(userRegReq.getMail());
         repoCat.save(new Category("Sin categoría", usuario));
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        return peticionCorrecta();
     }
 
     @PostMapping(LOGIN_USUARIO_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
         JSONObject res = new JSONObject();
         if (!userRegReq.isValid()){
-            res.put("statusText", "Los campos no pueden quedar vacíos.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Los campos no pueden quedar vacíos");
         }
         if(!repo.existsByMail(userRegReq.getMail())) {
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Usuario inexistente.");
         }
         User recuperado = repo.findByMail(userRegReq.getMail());
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
 
         if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
-            res.put("statusText", "Credenciales incorrectos");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Credenciales incorrectos.");
         }
         String token = getJWTToken(recuperado);
         res.put("token", token);
@@ -86,8 +89,7 @@ public class UserController {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (!repo.existsById(id)) {
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return peticionErronea("El usuario inexistente.");
         }
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         String token = getJWTToken(usuario);
@@ -100,8 +102,7 @@ public class UserController {
         Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (!repo.existsById(id)){
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+            return peticionErronea("Usuario inexistente.");
         }
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         res.put("user", new UserResponse(usuario));
@@ -109,15 +110,25 @@ public class UserController {
     }
 
     @DeleteMapping(ELIMINAR_USUARIO_URL)
-    public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) {
-        Long id = getUserIdFromRequest(request);
-        JSONObject res = new JSONObject();
-        if (!repo.existsById(id)) {
-            res.put("statusText", "Usuario no existente");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) throws UserNotFoundException {
+        User user = getUserFromRequest(request, repo);
+        if (!repo.existsById(user.getId())) {
+            return peticionErronea("Usuario inexistente.");
         }
-        repo.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        List<OwnsPassword> ownpass = repoOwns.findAllByUser(user);
+        for (OwnsPassword owp : ownpass){
+            if(owp.getRol() == 1){
+                //Cascada hacia todos los repoOwn
+                repoPass.delete(owp.getPassword());
+            }else{
+                repoOwns.delete(owp);
+            }
+        }
+
+        //cascada hacia categorías, que ya no tienen contraseñas
+        repo.deleteById(user.getId());
+        return peticionCorrecta();
     }
 
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)

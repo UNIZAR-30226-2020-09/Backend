@@ -40,7 +40,7 @@ public class Password {
 
     /* Relación 1:N con la tabla entre User y Password, extremo del 1*/
     @Getter
-    @OneToMany(mappedBy = "password")
+    @OneToMany(mappedBy = "password", cascade = CascadeType.ALL)
     private Set<OwnsPassword> usersSet = new HashSet<>();
 
     @Getter
