@@ -29,11 +29,4 @@ public class ModifyPasswordRequest {
                             (optionalText != null && !optionalText.isEmpty()) ||
                             (userName != null && !userName.isEmpty()) );
     }
-
-    public Password getAsPassword() {
-        Password pwd = new Password(password, passwordName, expirationTime);
-        pwd.setOptionalText(optionalText);
-        pwd.setUserName(userName);
-        return pwd;
-    }
 }
