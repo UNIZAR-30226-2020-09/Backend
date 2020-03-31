@@ -10,7 +10,7 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class InsertDeleteCategoryRequest {
+public class InsertCategoryRequest {
 
     @Getter
     @Setter

@@ -1,15 +1,15 @@
 package com.Backend.controller;
 
+import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.User;
-import com.Backend.model.request.InsertDeleteCategoryRequest;
-import com.Backend.model.response.CategoryResponse;
+import com.Backend.model.request.DeleteByIdRequest;
+import com.Backend.model.request.InsertCategoryRequest;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IUserRepo;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-//import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Backend.utils.JsonUtils.peticionCorrecta;
+import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
@@ -47,7 +49,7 @@ public class CategoryController {
 
     @PostMapping(INSERTAR_CATEGORIA_URL)
     public ResponseEntity<JSONObject> insertar(HttpServletRequest request,
-                                               @RequestBody InsertDeleteCategoryRequest idcr)
+                                               @RequestBody InsertCategoryRequest idcr)
             throws UserNotFoundException{
 
         User usuario = getUserFromRequest(request);
@@ -66,26 +68,23 @@ public class CategoryController {
     }
 
     @DeleteMapping(ELIMINAR_CATEGORIA_URL)
-    public ResponseEntity<JSONObject> eliminar(@RequestBody InsertDeleteCategoryRequest idcr,
-                                               HttpServletRequest request) throws UserNotFoundException {
+    public ResponseEntity<JSONObject> eliminar(@RequestBody DeleteByIdRequest del,
+                                               HttpServletRequest request) throws UserNotFoundException, CategoryNotFoundException {
 
         User usuario = getUserFromRequest(request);
-        JSONObject res = new JSONObject();
 
-        Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
-
-        if (existsCat) {
-            Category cat = repoCat.findByUsuarioAndCategoryName(usuario, idcr.getCategoryName());
-            repoCat.deleteById(cat.getId());
-            res.put("statusText", "La categoría " + idcr.getCategoryName() + " ha sido eliminada correctamente.");
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            res.put("statusText", "La categoría " + idcr.getCategoryName() + " no existe.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        try {
+            Category cat = repoCat.findById(del.getId()).orElseThrow(() -> new CategoryNotFoundException(del.getId()));
+            if (cat.getUsuario().getId().equals(usuario.getId())) {
+                repoCat.deleteById(cat.getId());
+                return peticionCorrecta();
+            } else
+                return peticionErronea("La categoría " + del.getId() + " pertenece a otro usuario.");
+        }catch(CategoryNotFoundException c){
+            return peticionErronea(c.getMessage());
         }
     }
 
-    // MUY PROBABLE QUE HAYA QUE CAMBIAR EL FORMATO
     @GetMapping(LISTAR_CATEGORIAS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
             throws UserNotFoundException {

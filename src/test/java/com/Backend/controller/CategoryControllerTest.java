@@ -3,7 +3,7 @@ package com.Backend.controller;
 import com.Backend.BackendApplication;
 import com.Backend.model.Category;
 import com.Backend.model.request.UserRegisterRequest;
-import com.Backend.model.request.InsertDeleteCategoryRequest;
+import com.Backend.model.request.InsertCategoryRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
@@ -40,10 +40,10 @@ class CategoryControllerTest {
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
-    static InsertDeleteCategoryRequest cat1;
-    static InsertDeleteCategoryRequest cat2;
-    static InsertDeleteCategoryRequest cat3;
-    static InsertDeleteCategoryRequest emptyCat;
+    static InsertCategoryRequest cat1;
+    static InsertCategoryRequest cat2;
+    static InsertCategoryRequest cat3;
+    static InsertCategoryRequest emptyCat;
 
     private String url = "http://localhost:8080";
     static HttpHeaders tokenHeaders;
@@ -57,9 +57,9 @@ class CategoryControllerTest {
         user1 = new UserRegisterRequest("user1@test.com","Usuario1");
 
         token = "";
-        cat1 = new InsertDeleteCategoryRequest("categ1");
-        cat2 = new InsertDeleteCategoryRequest("categ2");
-        emptyCat = new InsertDeleteCategoryRequest("");
+        cat1 = new InsertCategoryRequest("categ1");
+        cat2 = new InsertCategoryRequest("categ2");
+        emptyCat = new InsertCategoryRequest("");
     }
 
     @AfterAll
