@@ -1,14 +1,8 @@
 package com.Backend.model.response;
 
-import com.Backend.model.Category;
-import com.Backend.model.Password;
 import com.Backend.model.User;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 public class UserResponse {
 
@@ -24,18 +18,6 @@ public class UserResponse {
     Boolean hasPasswords;
     @Getter @Setter
     Boolean hasCategories;
-
-    @Override
-    public String toString() {
-        return "UserResponse{" +
-                "id=" + id +
-                ", mail='" + mail + '\'' +
-                ", masterPassword='" + masterPassword + '\'' +
-                ", token='" + token + '\'' +
-                ", hasPasswords=" + hasPasswords +
-                ", hasCategories=" + hasCategories +
-                '}';
-    }
 
     public UserResponse(User usuario){
 
