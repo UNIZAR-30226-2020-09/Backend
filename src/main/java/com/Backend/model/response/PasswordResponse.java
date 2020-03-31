@@ -23,15 +23,22 @@ public class PasswordResponse implements Serializable {
     String categoryName;
     @Getter @Setter
     int rol;
+    @Getter @Setter
+    String optionalText;
+    @Getter @Setter
+    String userName;
 
     @Override
     public String toString() {
-        return "CategoryResponse{" +
-                "passId=" + passId +
+        return "PasswordResponse{" +
+                "repoOwnsPass=" + repoOwnsPass +
+                ", passId=" + passId +
                 ", passwordName='" + passwordName + '\'' +
-                ". catId=" + catId +
+                ", catId=" + catId +
                 ", categoryName='" + categoryName + '\'' +
-                ", rol='" + rol +
+                ", rol=" + rol +
+                ", optionalText='" + optionalText + '\'' +
+                ", userName='" + userName + '\'' +
                 '}';
     }
 
@@ -42,6 +49,8 @@ public class PasswordResponse implements Serializable {
         this.catId = (ops.getPassword().getCategory()).getId();
         this.categoryName = (ops.getPassword().getCategory()).getCategoryName();
         this.rol = ops.getRol();
+        this.optionalText = (ops.getPassword().getOptionalText());
+        this.userName = (ops.getPassword().getUserName());
     }
 
 }

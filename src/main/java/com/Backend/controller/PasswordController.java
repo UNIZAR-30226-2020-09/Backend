@@ -3,6 +3,7 @@ package com.Backend.controller;
 import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.PasswordNotFoundException;
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
@@ -13,10 +14,14 @@ import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import lombok.Getter;
+import lombok.Setter;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,14 +77,13 @@ public class PasswordController {
                 System.out.println((i.getPassword()).getPasswordName());
                 if((i.getPassword()).getPasswordName().equals(password.getPasswordName())){
                     res.put("statusText", "Ya existe una contraseña con el mismo nombre para el usuario");
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
                 }
             }
 
             repoPass.save(password);
             OwnsPassword ownsp = new OwnsPassword(user, password, 1);
             repoOwnsPass.save(ownsp);
-            res.put("statusText", "Contraseña insertada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
         }
         catch(UserNotFoundException e){
@@ -95,20 +99,32 @@ public class PasswordController {
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request)
-            throws UserNotFoundException, PasswordNotFoundException {
+            throws UserNotFoundException {
 
         JSONObject res = new JSONObject();
         try {
             User user = getUserFromRequest(request);
-
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-            List<String> allpass = new ArrayList<>();
-            for (OwnsPassword i : allops) {
+
+            JSONArray allpass = new JSONArray();
+
+            for (OwnsPassword i:allops){
                 PasswordResponse pres = new PasswordResponse(i);
-                allpass.add(pres.toString());
+                JSONObject a = new JSONObject();
+                a.put("passId", pres.getPassId());
+                a.put("passwordName", pres.getPasswordName());
+                a.put("catId", pres.getCatId());
+                a.put("categoryName", pres.getCategoryName());
+                a.put("rol", pres.getRol());
+                a.put("optionalText",pres.getOptionalText());
+                a.put("userName", pres.getUserName());
+                allpass.add(a);
             }
+
+            JSONObject res = new JSONObject();
             res.put("passwords", allpass);
             return ResponseEntity.status(HttpStatus.OK).body(res);
+
         }
         catch(UserNotFoundException e){
             res.put("statusText", "Usuario no existente");
@@ -116,9 +132,6 @@ public class PasswordController {
         }
     }
 
-    /*
-     * Método para eliminar usuario
-     */
     @DeleteMapping(ELIMINAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request,
                                                @RequestBody DeleteByIdRequest deleteIdReq) throws UserNotFoundException, PasswordNotFoundException {
@@ -147,9 +160,7 @@ public class PasswordController {
                 //No eres el usuario creador
                 repoOwnsPass.delete(ops);
             }
-            res.put("statusText", "Contraseña eliminada");
             return ResponseEntity.status(HttpStatus.OK).body(res);
-
         }
         catch(UserNotFoundException e){
             res.put("statusText", "Usuario no existente");

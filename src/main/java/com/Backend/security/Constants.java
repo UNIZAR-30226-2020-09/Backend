@@ -14,6 +14,6 @@ public class Constants {
     public static final String HEADER_AUTHORIZATION_KEY = "Authorization";
     public static final String TOKEN_BEARER_PREFIX = "Bearer ";
 
-    public static final long TOKEN_EXPIRATION_TIME = 60000L * 60L; // 60 minutos
+    public static final long TOKEN_EXPIRATION_TIME = 600000000000L * 60L; // 60 minutos
     public static final String SUPER_SECRET_KEY = "ClaveSuperUltraMegaSecretisima";
 }
