@@ -18,7 +18,7 @@ public class UserRegisterRequest {
     private String masterPassword;
 
     public boolean isValid(){
-        return !mail.isEmpty() && !masterPassword.isEmpty();
+        return mail != null && !mail.isEmpty() && masterPassword!=null && !masterPassword.isEmpty();
     }
 
     public User getAsUser(){

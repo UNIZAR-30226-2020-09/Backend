@@ -18,7 +18,7 @@ public class ModifyCategory {
     private String categoryName;
 
     public boolean isValid(){
-        return id != null && id >= 0 && categoryName != null;
+        return id != null && id >= 0 && categoryName != null && !categoryName.isEmpty();
     }
 
 }

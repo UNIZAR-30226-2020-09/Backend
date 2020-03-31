@@ -15,7 +15,7 @@ public class MessageRequest {
     private String body;
 
     public boolean isValid(){
-        return !mail.isEmpty() && !body.isEmpty();
+        return mail!=null && !mail.isEmpty() && body!=null && !body.isEmpty();
     }
 
     public Message getAsMessage(){

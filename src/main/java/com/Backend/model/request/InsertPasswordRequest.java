@@ -20,7 +20,8 @@ public class InsertPasswordRequest {
     Integer expirationTime;
 
     public boolean isValid(){
-        return !password.isEmpty() && !passwordName.isEmpty() && expirationTime != null && passwordCategoryId != null;
+        return password!=null && !password.isEmpty() && passwordName!=null && !passwordName.isEmpty() &&
+                expirationTime != null && passwordCategoryId != null;
     }
 
     public Password getAsPassword() {

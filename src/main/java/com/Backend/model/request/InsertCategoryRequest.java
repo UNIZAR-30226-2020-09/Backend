@@ -14,7 +14,7 @@ public class InsertCategoryRequest {
     private String categoryName;
 
     public boolean isValid(){
-        return !categoryName.isEmpty();
+        return categoryName!= null && !categoryName.isEmpty();
     }
 
 }
