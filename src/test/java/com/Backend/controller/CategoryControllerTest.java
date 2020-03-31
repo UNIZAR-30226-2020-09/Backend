@@ -1,31 +1,28 @@
 package com.Backend.controller;
 
-import com.Backend.BackendApplication;
 import com.Backend.model.Category;
-import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.request.DeleteByIdRequest;
 import com.Backend.model.request.InsertCategoryRequest;
+import com.Backend.model.request.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
 import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -45,6 +42,9 @@ class CategoryControllerTest {
     static InsertCategoryRequest cat3;
     static InsertCategoryRequest emptyCat;
 
+    static DeleteByIdRequest cat1Id;
+    static DeleteByIdRequest cat2Id;
+
     private String url = "http://localhost:8080";
     static HttpHeaders tokenHeaders;
 
@@ -59,6 +59,7 @@ class CategoryControllerTest {
         token = "";
         cat1 = new InsertCategoryRequest("categ1");
         cat2 = new InsertCategoryRequest("categ2");
+        cat3 = new InsertCategoryRequest("categ3");
         emptyCat = new InsertCategoryRequest("");
     }
 
@@ -72,6 +73,19 @@ class CategoryControllerTest {
 
     @Test
     @Order(1)
+    void get_sinCategoria_OK() throws JsonProcessingException {
+        create_user_and_login();
+
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_CATEGORIAS_USUARIO_URL),
+                HttpMethod.GET, new HttpEntity<>(tokenHeaders), JSONObject.class);
+        ArrayList<Category> res = (ArrayList<Category>) response.getBody().get("categories");
+        JSONObject cat = new JSONObject((Map<String, ?>) res.get(0));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Sin categoría", cat.get("categoryName"));
+    }
+
+    @Test
+    @Order(2)
     void post_insert_OK() throws JsonProcessingException {
         create_user_and_login();
 
@@ -81,7 +95,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void post_insert_OK_followed_by_BAD_REQUEST() throws JsonProcessingException {
         create_user_and_login();
 
@@ -95,19 +109,19 @@ class CategoryControllerTest {
         assertNotEquals(sameMailResponse.getStatusCode(), response.getStatusCode());
     }
 
-    /*
+
     @Test
-    @Order(3)
+    @Order(4)
     void post_registro_BAD_REQUEST_2() throws JsonProcessingException {
         create_user_and_login();
 
         HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(emptyCat), tokenHeaders);
         ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + INSERTAR_CATEGORIA_URL, entity, JSONObject.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }*/
+    }
 
     @Test
-    @Order(4)
+    @Order(5)
     void get_listar_OK() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         create_user_and_login();
@@ -115,21 +129,39 @@ class CategoryControllerTest {
         ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_CATEGORIAS_USUARIO_URL),
                 HttpMethod.GET, new HttpEntity<>(tokenHeaders), JSONObject.class);
         ArrayList<Category> res = (ArrayList<Category>) response.getBody().get("categories");
-        JSONObject cat = new JSONObject((Map<String, ?>) res.get(0));
+        JSONObject cat1 = new JSONObject((Map<String, ?>) res.get(1));
+        JSONObject cat2 = new JSONObject((Map<String, ?>) res.get(2));
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("categ1", cat.get("categoryName"));
+        assertEquals("categ1", cat1.get("categoryName"));
+        assertEquals("categ2", cat2.get("categoryName"));
     }
 
     @Test
-    @Order(5)
-    void delete_eliminar_OK() throws JsonProcessingException {
+    @Order(6)
+    void delete_eliminar_OK_BAD() throws JsonProcessingException {
         create_user_and_login();
 
-        HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat2), tokenHeaders);
-        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_CATEGORIAS_USUARIO_URL),
+                HttpMethod.GET, new HttpEntity<>(tokenHeaders), JSONObject.class);
+        ArrayList<Category> res = (ArrayList<Category>) response.getBody().get("categories");
+        JSONObject cat1 = new JSONObject((Map<String, ?>) res.get(1));
+        cat1Id = new DeleteByIdRequest(((Number)cat1.get("catId")).longValue());
+
+        HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat1Id), tokenHeaders);
+        response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
                 HttpMethod.DELETE, entity, JSONObject.class);
 
-        entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat1), tokenHeaders);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        //Intentamos borrar por segunda vez
+        response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
+                HttpMethod.DELETE, entity, JSONObject.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+        JSONObject cat2 = new JSONObject((Map<String, ?>) res.get(2));
+        cat2Id = new DeleteByIdRequest(((Number)cat2.get("catId")).longValue());
+
+        entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(cat2Id), tokenHeaders);
         response = restTemplate.exchange(URI.create(url + ELIMINAR_CATEGORIA_URL),
                 HttpMethod.DELETE, entity, JSONObject.class);
 
