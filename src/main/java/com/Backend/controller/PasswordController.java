@@ -3,7 +3,6 @@ package com.Backend.controller;
 import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.PasswordNotFoundException;
 import com.Backend.exception.UserNotFoundException;
-import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
@@ -14,18 +13,14 @@ import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
-import lombok.Getter;
-import lombok.Setter;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
@@ -120,8 +115,6 @@ public class PasswordController {
                 a.put("userName", pres.getUserName());
                 allpass.add(a);
             }
-
-            JSONObject res = new JSONObject();
             res.put("passwords", allpass);
             return ResponseEntity.status(HttpStatus.OK).body(res);
 
