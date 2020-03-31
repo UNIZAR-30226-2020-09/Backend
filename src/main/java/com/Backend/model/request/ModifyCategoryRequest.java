@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModifyCategory {
+public class ModifyCategoryRequest {
 
     @Getter
     @Setter

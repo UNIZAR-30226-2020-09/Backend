@@ -6,7 +6,7 @@ import com.Backend.model.Category;
 import com.Backend.model.User;
 import com.Backend.model.request.DeleteByIdRequest;
 import com.Backend.model.request.InsertCategoryRequest;
-import com.Backend.model.request.ModifyCategory;
+import com.Backend.model.request.ModifyCategoryRequest;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
@@ -26,7 +26,6 @@ import static com.Backend.utils.CategoryUtils.getSinCategoria;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
-import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
 public class CategoryController {
@@ -78,7 +77,7 @@ public class CategoryController {
                 repoCat.deleteById(cat.getId());
                 return peticionCorrecta();
             } else
-                return peticionErronea("No se ha podido modificar la categoría.");
+                return peticionErronea("No se ha podido eliminar la categoría.");
         }catch(CategoryNotFoundException c){
             return peticionErronea(c.getMessage());
         }
@@ -98,7 +97,7 @@ public class CategoryController {
     }
 
     @PostMapping(MODIFICAR_CATEGORIAS_USUARIO_URL)
-    public ResponseEntity<JSONObject> modificar(@RequestBody ModifyCategory modCat,
+    public ResponseEntity<JSONObject> modificar(@RequestBody ModifyCategoryRequest modCat,
                                                 HttpServletRequest request) throws UserNotFoundException {
 
         User usuario = getUserFromRequest(request, repoUser);
