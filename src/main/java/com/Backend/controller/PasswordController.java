@@ -3,16 +3,21 @@ package com.Backend.controller;
 import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.PasswordNotFoundException;
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.DeleteByIdRequest;
 import com.Backend.model.request.InsertPasswordRequest;
+import com.Backend.model.request.ModifyCategory;
+import com.Backend.model.request.ModifyPasswordRequest;
 import com.Backend.model.response.PasswordResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import lombok.Getter;
+import lombok.Setter;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.Backend.utils.CategoryUtils.getSinCategoria;
+import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
@@ -34,6 +41,7 @@ public class PasswordController {
     public static final String INSERTAR_PASSWORD_URL = "/api/contrasenya/insertar";
     public static final String ELIMINAR_PASSWORD_URL = "/api/contrasenya/eliminar";
     public static final String LISTAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/listar";
+    public static final String MODIFICAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/modificar";
 
     @Autowired
     IPassRepo repoPass;
@@ -150,5 +158,46 @@ public class PasswordController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
     }
+
+    @PostMapping(MODIFICAR_PASSWORDS_USUARIO_URL)
+    public ResponseEntity<JSONObject> modificar(@RequestBody ModifyPasswordRequest passReq,
+                                                HttpServletRequest request) throws UserNotFoundException {
+        JSONObject res = new JSONObject();
+        if(!passReq.isValid()){
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        try{
+            User user = getUserFromRequest(request, repoUser);
+
+            Long idPass = passReq.getId();
+            Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idPass));
+            OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
+            if (!(ops.getRol() == 1)) {
+                return peticionErronea("No eres el propietario");
+            }
+            //Eres el usuario creador
+            if(passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
+            if(passReq.getPasswordCategoryId() != null){
+                Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
+                password.setCategory(newCat);
+            }
+            if(passReq.getPassword() != null) password.setPassword(passReq.getPassword());
+            if(passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
+            if(passReq.getUserName() != null) password.setUserName(passReq.getUserName());
+            if(passReq.getExpirationTime() != null) password.setExpirationTime(passReq.getExpirationTime());
+            repoPass.save(password);
+            return peticionCorrecta();
+        }
+        catch(UserNotFoundException e){
+            return peticionErronea("Usuario no existente");
+        }
+        catch (PasswordNotFoundException e) {
+            return peticionErronea("Contraseña no existente");
+        }
+        catch (CategoryNotFoundException e) {
+            return peticionErronea("Categoría no encontrada.");
+        }
+    }
+
 
 }
