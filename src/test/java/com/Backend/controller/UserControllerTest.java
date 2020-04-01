@@ -1,15 +1,11 @@
 package com.Backend.controller;
 
-import com.Backend.BackendApplication;
 import com.Backend.model.request.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
@@ -20,7 +16,8 @@ import java.util.LinkedHashMap;
 
 import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
 import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -46,7 +43,7 @@ class UserControllerTest {
         user1 = new UserRegisterRequest("user1@test.com","Usuario1");
         user2 = new UserRegisterRequest("user2@test.com","Usuario2");
         user3 = new UserRegisterRequest("user3@test.com","Usuario3");
-        incompleteUserReq = new UserRegisterRequest();
+        incompleteUserReq = new UserRegisterRequest("", null);
         user1Password = user1.getMasterPassword();
     }
 
