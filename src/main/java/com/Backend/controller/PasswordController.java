@@ -9,15 +9,12 @@ import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.DeleteByIdRequest;
 import com.Backend.model.request.InsertPasswordRequest;
-import com.Backend.model.request.ModifyCategory;
 import com.Backend.model.request.ModifyPasswordRequest;
 import com.Backend.model.response.PasswordResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
-import lombok.Getter;
-import lombok.Setter;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +25,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static com.Backend.utils.CategoryUtils.getSinCategoria;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
-import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
 public class PasswordController {
@@ -69,7 +64,8 @@ public class PasswordController {
             //Se comprueba que el usuario no tiene una contraseña con el mismo nombre
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             for (OwnsPassword i:allops){
-                if((i.getPassword()).getPasswordName().equals(password.getPasswordName())){
+                if((i.getPassword()).getPasswordName().equals(password.getPasswordName()) &&
+                        (i.getPassword()).getUserName().equals(password.getUserName())){
                     return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 }
             }
