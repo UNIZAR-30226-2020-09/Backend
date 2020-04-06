@@ -1,7 +1,5 @@
 package com.Backend.controller;
 
-import com.Backend.exception.UserNotFoundException;
-import com.Backend.model.User;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IMensajeRepo;
 import com.Backend.repository.IPassRepo;
@@ -15,11 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.util.List;
-
 import static com.Backend.security.Constants.ESTADISTICAS;
-import static com.Backend.utils.TokenUtils.getJWTToken;
-import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
 
 @RestController
 public class PandoraController {

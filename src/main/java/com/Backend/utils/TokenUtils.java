@@ -9,6 +9,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -34,12 +35,16 @@ public class TokenUtils {
         return parseLong(getUserIdFromToken(authorization.substring(7)));
     }
 
-    public static String getJWTToken(User usuario) {
+    public static String getJWTTokenFromUser(User usuario, IUserRepo repo) throws UserNotFoundException {
+        User recuperado = repo.findById(usuario.getId()).orElseThrow(() -> new UserNotFoundException(usuario.getId()));
+        return getJWTToken(usuario, recuperado.getMasterPassword());
+    }
+
+    public static String getJWTToken(User usuario, String hashedPassword ) {
 
         // Únicamente le autorizamos como usuario
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("Rol_usuario");
-
 
         String token = Jwts
                 .builder()
@@ -49,6 +54,7 @@ public class TokenUtils {
                         grantedAuthorities.stream()
                                 .map(GrantedAuthority::getAuthority)
                                 .collect(Collectors.toList()))
+                .claim("hash", hashedPassword)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512,

@@ -1,5 +1,7 @@
 package com.Backend.security;
 
+import com.Backend.repository.IUserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,10 +20,13 @@ import static com.Backend.security.Constants.*;
 @Configuration
 class WebSecurityPandora extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    IUserRepo repository;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-                .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JWTAuthorizationFilter(repository), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, ESTADISTICAS).permitAll()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
