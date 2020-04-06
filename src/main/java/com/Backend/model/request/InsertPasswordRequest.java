@@ -1,9 +1,11 @@
 package com.Backend.model.request;
 
 import com.Backend.model.Password;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 public class InsertPasswordRequest {
 
     @Getter @Setter
