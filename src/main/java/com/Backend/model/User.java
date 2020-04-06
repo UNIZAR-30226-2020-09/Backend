@@ -3,6 +3,7 @@ package com.Backend.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jboss.aerogear.security.otp.api.Base32;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -37,6 +38,10 @@ public class User {
     @Setter
     private String masterPassword;
 
+    @Getter
+    @Setter
+    private String secret;
+
     /*
      * Relacion M:N con password, este método tiene un problema, no existe
      *  el concepto de añadir atributos a las relaciones N:M, por lo que no
@@ -63,6 +68,7 @@ public class User {
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;
         this.mail = mail;
+        this.secret = Base32.random();
     }
 }
 
