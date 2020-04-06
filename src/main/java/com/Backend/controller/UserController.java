@@ -112,6 +112,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/api/usuarios/get2FAkey")
+    public ResponseEntity<JSONObject> get2FAkey(HttpServletRequest request) throws UserNotFoundException {
+        Long id = getUserIdFromRequest(request);
+        JSONObject res = new JSONObject();
+        if (!repo.existsById(id)) {
+            return peticionErronea("El usuario inexistente.");
+        }
+        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        res.put("key", usuario.getSecret());
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @GetMapping(TOKEN_USUARIO_URL)
     public ResponseEntity<JSONObject> token(HttpServletRequest request) throws UserNotFoundException {
         Long id = getUserIdFromRequest(request);
