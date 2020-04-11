@@ -25,7 +25,6 @@ import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CategoryControllerTest {
@@ -179,11 +178,8 @@ class CategoryControllerTest {
 
     void create_user_and_login() throws JsonProcessingException {
         if(token.equals("")) {
-            HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
-            ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + REGISTRO_USUARIO_URL, entity, JSONObject.class);
-
-            entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
-            response = restTemplate.postForEntity(url + LOGIN_USUARIO_URL, entity, JSONObject.class);
+            HttpEntity<String> entity  = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
+            ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + LOGIN_USUARIO_URL, entity, JSONObject.class);
             token = response.getBody().getAsString("token");
             tokenHeaders = headerFromToken(token);
         }

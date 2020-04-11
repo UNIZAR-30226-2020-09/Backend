@@ -152,7 +152,7 @@ public class PasswordController {
 
     @PostMapping(MODIFICAR_PASSWORDS_USUARIO_URL)
     public ResponseEntity<JSONObject> modificar(@RequestBody ModifyPasswordRequest passReq, HttpServletRequest request) {
-        JSONObject res = new JSONObject();
+
         if (!passReq.isValid()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
         }
@@ -186,7 +186,7 @@ public class PasswordController {
         }
     }
 
-    @GetMapping(GENERAR_PASSWORD_URL)
+    @PostMapping(GENERAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> generar(@RequestBody GeneratePasswordRequest req) {
         if(req.isValid()){
             String pass = generateStrongPassword(req.getMinus(), req.getMayus(),
