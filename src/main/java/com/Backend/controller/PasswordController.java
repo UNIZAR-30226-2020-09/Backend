@@ -74,8 +74,6 @@ public class PasswordController {
                     return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 }
             }
-            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
-            Password.setPassword(textEncryptor.encrypt(password.getPassword()));
             repoPass.save(password);
             OwnsPassword ownsp = new OwnsPassword(user, password, 1);
             repoOwnsPass.save(ownsp);
@@ -96,7 +94,7 @@ public class PasswordController {
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
             JSONArray allpass = new JSONArray();
-            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
+            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "46b930");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
@@ -181,7 +179,7 @@ public class PasswordController {
                 password.setCategory(newCat);
             }
             if (passReq.getPassword() != null) {
-                TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
+                TextEncryptor textEncryptor = Encryptors.text("masterPassword", "46b930");
                 password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
             }
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
