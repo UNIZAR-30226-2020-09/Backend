@@ -24,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
@@ -93,6 +95,7 @@ public class PasswordController {
             JSONArray allpass = new JSONArray();
 
             for (OwnsPassword i : allops) {
+                // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
                 JSONObject a = new JSONObject();
                 a.put("passId", pres.getPassId());
@@ -102,6 +105,8 @@ public class PasswordController {
                 a.put("rol", pres.getRol());
                 a.put("optionalText", pres.getOptionalText());
                 a.put("userName", pres.getUserName());
+                a.put("password", pres.getPassword());
+                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
                 allpass.add(a);
             }
             res.put("passwords", allpass);
@@ -129,12 +134,6 @@ public class PasswordController {
             OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
 
             if (ops.getRol() == 1) {
-                //Eres el usuario creador
-                List<OwnsPassword> allops;
-                allops = repoOwnsPass.findAllByPassword(password);
-                for (OwnsPassword i : allops) {
-                    repoOwnsPass.delete(i);
-                }
                 repoPass.delete(password);
             } else {
                 //No eres el usuario creador
@@ -174,7 +173,11 @@ public class PasswordController {
             if (passReq.getPassword() != null) password.setPassword(passReq.getPassword());
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
             if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
-            if (passReq.getExpirationTime() != null) password.setExpirationTime(passReq.getExpirationTime());
+            if (passReq.getExpirationTime() != null){
+                LocalDate ld = LocalDate.now();
+                ld = ld.plusDays(passReq.getExpirationTime());
+                password.setExpirationTime(ld);
+            }
             repoPass.save(password);
             return peticionCorrecta();
         } catch (UserNotFoundException e) {

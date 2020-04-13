@@ -7,6 +7,9 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 
 public class PasswordResponse implements Serializable {
 
@@ -22,11 +25,15 @@ public class PasswordResponse implements Serializable {
     @Getter @Setter
     String categoryName;
     @Getter @Setter
+    String password;
+    @Getter @Setter
     int rol;
     @Getter @Setter
     String optionalText;
     @Getter @Setter
     String userName;
+    @Getter @Setter
+    long expirationDate;
 
     public PasswordResponse(OwnsPassword ops){
 
@@ -37,6 +44,11 @@ public class PasswordResponse implements Serializable {
         this.rol = ops.getRol();
         this.optionalText = (ops.getPassword().getOptionalText());
         this.userName = (ops.getPassword().getUserName());
+        this.password = ops.getPassword().getPassword();
+
+        LocalDate actual = LocalDate.now();
+        LocalDate fin = ops.getPassword().getExpirationTime();
+        expirationDate = ChronoUnit.DAYS.between(actual, fin);
     }
 
 }
