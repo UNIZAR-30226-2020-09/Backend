@@ -7,10 +7,7 @@ import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
-import com.Backend.model.request.DeleteByIdRequest;
-import com.Backend.model.request.GeneratePasswordRequest;
-import com.Backend.model.request.InsertPasswordRequest;
-import com.Backend.model.request.ModifyPasswordRequest;
+import com.Backend.model.request.*;
 import com.Backend.model.response.PasswordResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
@@ -86,7 +83,8 @@ public class PasswordController {
     }
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
-    public ResponseEntity<JSONObject> listar(HttpServletRequest request){
+    public ResponseEntity<JSONObject> listar(HttpServletRequest request,
+                                             @RequestBody ListPasswordRequest passReq){
 
         JSONObject res = new JSONObject();
         try {
@@ -94,7 +92,7 @@ public class PasswordController {
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
             JSONArray allpass = new JSONArray();
-            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "46b930");
+            TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
@@ -179,7 +177,7 @@ public class PasswordController {
                 password.setCategory(newCat);
             }
             if (passReq.getPassword() != null) {
-                TextEncryptor textEncryptor = Encryptors.text("masterPassword", "46b930");
+                TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
                 password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
             }
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());

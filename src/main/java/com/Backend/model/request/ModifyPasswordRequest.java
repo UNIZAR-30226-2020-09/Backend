@@ -11,6 +11,8 @@ import lombok.Setter;
 public class ModifyPasswordRequest {
 
     @Getter @Setter
+    private String masterPassword;
+    @Getter @Setter
     private Long id;
     @Getter @Setter
     private String passwordName;
@@ -26,10 +28,11 @@ public class ModifyPasswordRequest {
     Integer expirationTime;
 
     public boolean isValid(){
-        return id != null && ((password!=null && !password.isEmpty()) ||
-                            (passwordName!=null && !passwordName.isEmpty()) ||
-                            expirationTime != null || passwordCategoryId != null ||
-                            (optionalText != null && !optionalText.isEmpty()) ||
-                            (userName != null && !userName.isEmpty()) );
+        return id != null && masterPassword!=null && !masterPassword.isEmpty() &&
+                ((password!=null && !password.isEmpty()) ||
+                (passwordName!=null && !passwordName.isEmpty()) ||
+                expirationTime != null || passwordCategoryId != null ||
+                (optionalText != null && !optionalText.isEmpty()) ||
+                (userName != null && !userName.isEmpty()) );
     }
 }
