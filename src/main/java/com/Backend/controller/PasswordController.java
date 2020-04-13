@@ -21,6 +21,8 @@ import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,7 +74,8 @@ public class PasswordController {
                     return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 }
             }
-
+            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
+            Password.setPassword(textEncryptor.encrypt(password.getPassword()));
             repoPass.save(password);
             OwnsPassword ownsp = new OwnsPassword(user, password, 1);
             repoOwnsPass.save(ownsp);
@@ -93,7 +96,7 @@ public class PasswordController {
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
             JSONArray allpass = new JSONArray();
-
+            TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
@@ -105,7 +108,7 @@ public class PasswordController {
                 a.put("rol", pres.getRol());
                 a.put("optionalText", pres.getOptionalText());
                 a.put("userName", pres.getUserName());
-                a.put("password", pres.getPassword());
+                a.put("password", textEncryptor.decrypt(pres.getPassword()));
                 a.put("noDaysBeforeExpiration", pres.getExpirationDate());
                 allpass.add(a);
             }
@@ -177,7 +180,10 @@ public class PasswordController {
                 Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
                 password.setCategory(newCat);
             }
-            if (passReq.getPassword() != null) password.setPassword(passReq.getPassword());
+            if (passReq.getPassword() != null) {
+                TextEncryptor textEncryptor = Encryptors.text("masterPassword", "salt");
+                password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
+            }
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
             if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
             if (passReq.getExpirationTime() != null){
