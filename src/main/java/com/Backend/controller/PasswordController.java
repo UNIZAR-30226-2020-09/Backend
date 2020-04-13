@@ -165,6 +165,13 @@ public class PasswordController {
                 return peticionErronea("No eres el propietario");
             }
             //Eres el usuario creador
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+            for (OwnsPassword i : allops) {
+                if ((i.getPassword()).getPasswordName().equals(password.getPasswordName())) {
+                    return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
+                }
+            }
+
             if (passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
             if (passReq.getPasswordCategoryId() != null) {
                 Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
