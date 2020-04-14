@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PasswordControllerTest {
-
+/*
     private static TestRestTemplate restTemplate = new TestRestTemplate();
     private static String url = "http://localhost:8080";
     static HttpHeaders basicHeaders;
@@ -255,5 +255,5 @@ public class PasswordControllerTest {
         ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + "/api/usuarios/eliminar"),
                 HttpMethod.DELETE, new HttpEntity<>(headersUsuario), JSONObject.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+    }*/
 }
