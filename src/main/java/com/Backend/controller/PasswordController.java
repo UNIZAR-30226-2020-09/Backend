@@ -120,8 +120,8 @@ public class PasswordController {
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
     public ResponseEntity<JSONObject> get_listar(HttpServletRequest request,
-                                                 @RequestBody ListPasswordRequest passReq){
-        if(!passReq.isValid()) {
+                                                 @RequestParam String masterPassword){
+        if(masterPassword == null || masterPassword.isEmpty()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
         }
         JSONObject res = new JSONObject();
@@ -130,7 +130,7 @@ public class PasswordController {
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
 
             JSONArray allpass = new JSONArray();
-            TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
+            TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
