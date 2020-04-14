@@ -82,10 +82,12 @@ public class PasswordController {
         }
     }
 
-    @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
+    @PostMapping(LISTAR_PASSWORDS_USUARIO_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request,
                                              @RequestBody ListPasswordRequest passReq){
-
+        if (!passReq.isValid()) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
         JSONObject res = new JSONObject();
         try {
             User user = getUserFromRequest(request, repoUser);
