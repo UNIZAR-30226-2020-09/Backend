@@ -120,18 +120,17 @@ public class PasswordController {
 
     @DeleteMapping(ELIMINAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request,
-                                               @RequestBody DeleteByIdRequest deleteIdReq) {
+                                               @RequestParam Long id) {
 
         JSONObject res = new JSONObject();
-        if (!deleteIdReq.isValid()) {
+        if (id == null) {
             res.put("statusText", "Los campos no pueden quedar vacíos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
         try {
             User user = getUserFromRequest(request, repoUser);
 
-            Long idPass = deleteIdReq.getId();
-            Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idPass));
+            Password password = repoPass.findById(id).orElseThrow(() -> new PasswordNotFoundException(id));
             OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
 
             if (ops.getRol() == 1) {
