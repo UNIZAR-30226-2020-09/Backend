@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PasswordControllerTest {
-/*
+
     private static TestRestTemplate restTemplate = new TestRestTemplate();
     private static String url = "http://localhost:8080";
     static HttpHeaders basicHeaders;
@@ -70,11 +70,11 @@ public class PasswordControllerTest {
         sinCategoriaIdUser2 = sinCategoria(headersUser2);
         sinCategoriaIdUser3 = sinCategoria(headersUser3);
 
-        ipr1 = new InsertPasswordRequest("name1", sinCategoriaIdUser1,
+        ipr1 = new InsertPasswordRequest("mP", "name1", sinCategoriaIdUser1,
                 "pass1","oT", null, 300);
-        ipr2 = new InsertPasswordRequest("name2", sinCategoriaIdUser2,
+        ipr2 = new InsertPasswordRequest("mP","name2", sinCategoriaIdUser2,
                 "pass2","jeje", "@user", 90);
-        ipr3 = new InsertPasswordRequest("name3", sinCategoriaIdUser3,
+        ipr3 = new InsertPasswordRequest("mP","name3", sinCategoriaIdUser3,
                 "pass3","test", null, 10);
     }
 
@@ -122,16 +122,19 @@ public class PasswordControllerTest {
 
     @Test
     @Order(3)
-    void listar_OK() {
+    void listar_OK() throws JsonProcessingException {
 
+        ListPasswordRequest lpr = new ListPasswordRequest("mP");
+        HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(lpr), headersUser1);
         ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_PASSWORDS_USUARIO_URL),
-                HttpMethod.GET, new HttpEntity<String>(headersUser1), JSONObject.class);
+                HttpMethod.POST, entity, JSONObject.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
         cogerIdsPasswords(response); // Para próximos tests
 
+        HttpEntity<String> entity2 = new HttpEntity<>(new ObjectMapper().writeValueAsString(lpr), headersUser2);
        response = restTemplate.exchange(URI.create(url + LISTAR_PASSWORDS_USUARIO_URL),
-                HttpMethod.GET, new HttpEntity<String>(headersUser2), JSONObject.class);
+                HttpMethod.POST, entity2, JSONObject.class);
        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -162,10 +165,10 @@ public class PasswordControllerTest {
     @Test
     @Order(5)
     void modificar_password() throws JsonProcessingException {
-        ModifyPasswordRequest modPassReq1 = new ModifyPasswordRequest(passwordsOfUser.get(0), "name",
+        ModifyPasswordRequest modPassReq1 = new ModifyPasswordRequest("mP", passwordsOfUser.get(0), "name",
                 sinCategoriaIdUser1, "pass", "optional", null, 99);
 
-        ModifyPasswordRequest modPassReq2 = new ModifyPasswordRequest(passwordsOfUser.get(0), "name",
+        ModifyPasswordRequest modPassReq2 = new ModifyPasswordRequest("mP", passwordsOfUser.get(0), "name",
                 -1L, "pass", "optional", null, 99);
 
         HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(modPassReq1), headersUser1);
@@ -255,5 +258,5 @@ public class PasswordControllerTest {
         ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + "/api/usuarios/eliminar"),
                 HttpMethod.DELETE, new HttpEntity<>(headersUsuario), JSONObject.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-    }*/
+    }
 }

@@ -179,8 +179,11 @@ class CategoryControllerTest {
     void create_user_and_login() throws JsonProcessingException {
         if(token.equals("")) {
             HttpEntity<String> entity  = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
-            ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + LOGIN_USUARIO_URL, entity, JSONObject.class);
+            ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + REGISTRO_USUARIO_URL, entity, JSONObject.class);
+            entity  = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
+            response = restTemplate.postForEntity(url + LOGIN_USUARIO_URL, entity, JSONObject.class);
             token = response.getBody().getAsString("token");
+            System.out.println(token);
             tokenHeaders = headerFromToken(token);
         }
     }
