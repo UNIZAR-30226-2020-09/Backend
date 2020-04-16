@@ -118,20 +118,55 @@ public class PasswordController {
         }
     }
 
+    @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
+    public ResponseEntity<JSONObject> get_listar(HttpServletRequest request,
+                                                 @RequestParam String masterPassword){
+        if(masterPassword == null || masterPassword.isEmpty()) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        JSONObject res = new JSONObject();
+        try {
+            User user = getUserFromRequest(request, repoUser);
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+
+            JSONArray allpass = new JSONArray();
+            TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
+            for (OwnsPassword i : allops) {
+                // En el constructor se calcula los días de diferencia.
+                PasswordResponse pres = new PasswordResponse(i);
+                JSONObject a = new JSONObject();
+                a.put("passId", pres.getPassId());
+                a.put("passwordName", pres.getPasswordName());
+                a.put("catId", pres.getCatId());
+                a.put("categoryName", pres.getCategoryName());
+                a.put("rol", pres.getRol());
+                a.put("optionalText", pres.getOptionalText());
+                a.put("userName", pres.getUserName());
+                a.put("password", textEncryptor.decrypt(pres.getPassword()));
+                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+                allpass.add(a);
+            }
+            res.put("passwords", allpass);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        } catch (UserNotFoundException e) {
+            return peticionErronea("Usuario no existente.");
+        }
+    }
+
     @DeleteMapping(ELIMINAR_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request,
-                                               @RequestBody DeleteByIdRequest deleteIdReq) {
+                                               @RequestParam Long id) {
 
         JSONObject res = new JSONObject();
-        if (!deleteIdReq.isValid()) {
+        if (id == null) {
             res.put("statusText", "Los campos no pueden quedar vacíos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
         }
         try {
             User user = getUserFromRequest(request, repoUser);
 
-            Long idPass = deleteIdReq.getId();
-            Password password = repoPass.findById(idPass).orElseThrow(() -> new PasswordNotFoundException(idPass));
+            Password password = repoPass.findById(id).orElseThrow(() -> new PasswordNotFoundException(id));
             OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
 
             if (ops.getRol() == 1) {

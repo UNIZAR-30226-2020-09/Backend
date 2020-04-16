@@ -66,12 +66,12 @@ public class CategoryController {
     }
 
     @DeleteMapping(ELIMINAR_CATEGORIA_URL)
-    public ResponseEntity<JSONObject> eliminar(@RequestBody DeleteByIdRequest del,
+    public ResponseEntity<JSONObject> eliminar(@RequestParam Long id,
                                                HttpServletRequest request) throws UserNotFoundException {
 
         User usuario = getUserFromRequest(request, repoUser);
         try {
-            Category cat = repoCat.findById(del.getId()).orElseThrow(() -> new CategoryNotFoundException(del.getId()));
+            Category cat = repoCat.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
             if (cat.getUsuario().getId().equals(usuario.getId()) && !cat.equals(getSinCategoria(repoCat, usuario))) {
                 PasswordUtils.modifyPasswordsAtCategoryDelete(cat, repoPass, repoCat, cat.getUsuario());
                 repoCat.deleteById(cat.getId());
