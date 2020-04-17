@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
@@ -39,6 +38,7 @@ public class PasswordController {
     public static final String INSERTAR_PASSWORD_URL = "/api/contrasenya/insertar";
     public static final String ELIMINAR_PASSWORD_URL = "/api/contrasenya/eliminar";
     public static final String LISTAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/listar";
+    public static final String LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL = "/api/contrasenya/listarPorCategoria";
     public static final String MODIFICAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/modificar";
     public static final String GENERAR_PASSWORD_URL = "/api/contrasenya/generar";
 
@@ -119,7 +119,7 @@ public class PasswordController {
     }
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
-    public ResponseEntity<JSONObject> get_listar(HttpServletRequest request,
+    public ResponseEntity<JSONObject> get_listarPorCategoria(HttpServletRequest request,
                                                  @RequestParam String masterPassword){
         if(masterPassword == null || masterPassword.isEmpty()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
@@ -134,6 +134,81 @@ public class PasswordController {
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
+                JSONObject a = new JSONObject();
+                a.put("passId", pres.getPassId());
+                a.put("passwordName", pres.getPasswordName());
+                a.put("catId", pres.getCatId());
+                a.put("categoryName", pres.getCategoryName());
+                a.put("rol", pres.getRol());
+                a.put("optionalText", pres.getOptionalText());
+                a.put("userName", pres.getUserName());
+                a.put("password", textEncryptor.decrypt(pres.getPassword()));
+                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+                allpass.add(a);
+            }
+            res.put("passwords", allpass);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        } catch (UserNotFoundException e) {
+            return peticionErronea("Usuario no existente.");
+        }
+    }
+
+    @PostMapping(LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL)
+    public ResponseEntity<JSONObject> post_listarPorCategoria(HttpServletRequest request,
+                                                              @RequestBody ListPasswordByCategoryRequest passReq){
+        if (!passReq.isValid()) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        JSONObject res = new JSONObject();
+        try {
+            User user = getUserFromRequest(request, repoUser);
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+
+            JSONArray allpass = new JSONArray();
+            TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
+            for (OwnsPassword i : allops) {
+                // En el constructor se calcula los días de diferencia.
+                PasswordResponse pres = new PasswordResponse(i);
+                if (pres.getCatId() != passReq.getIdCat()) continue;
+                JSONObject a = new JSONObject();
+                a.put("passId", pres.getPassId());
+                a.put("passwordName", pres.getPasswordName());
+                a.put("catId", pres.getCatId());
+                a.put("categoryName", pres.getCategoryName());
+                a.put("rol", pres.getRol());
+                a.put("optionalText", pres.getOptionalText());
+                a.put("userName", pres.getUserName());
+                a.put("password", textEncryptor.decrypt(pres.getPassword()));
+                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+                allpass.add(a);
+            }
+            res.put("passwords", allpass);
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+
+        } catch (UserNotFoundException e) {
+            return peticionErronea("Usuario no existente.");
+        }
+    }
+
+    @GetMapping(LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL)
+    public ResponseEntity<JSONObject> get_listarPorCategoria(HttpServletRequest request,
+                                                             @RequestParam String masterPassword,
+                                                             @RequestParam Long idCat){
+        if(masterPassword == null || masterPassword.isEmpty() || idCat == null) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        JSONObject res = new JSONObject();
+        try {
+            User user = getUserFromRequest(request, repoUser);
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+
+            JSONArray allpass = new JSONArray();
+            TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
+            for (OwnsPassword i : allops) {
+                // En el constructor se calcula los días de diferencia.
+                PasswordResponse pres = new PasswordResponse(i);
+                if (pres.getCatId() != idCat) continue;
                 JSONObject a = new JSONObject();
                 a.put("passId", pres.getPassId());
                 a.put("passwordName", pres.getPasswordName());
