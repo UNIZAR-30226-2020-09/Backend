@@ -4,8 +4,8 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.User;
-import com.Backend.model.request.ModifyUserRequest;
-import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.request.user.ModifyUserRequest;
+import com.Backend.model.request.user.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
@@ -20,13 +20,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
-import static com.Backend.utils.PasswordUtils.modifyPasswordsAtCategoryDelete;
 import static com.Backend.utils.TokenUtils.*;
 
 @RestController
@@ -63,6 +61,9 @@ public class UserController {
         // Si no buscas un usuario con id falla la inserción.
         User usuario = repo.findByMail(userRegReq.getMail());
         repoCat.save(new Category("Sin categoría", usuario));
+        repoCat.save(new Category("Redes Sociales", usuario));
+        repoCat.save(new Category("Cuentas bancarias", usuario));
+        repoCat.save(new Category("Tarjetas de crédito", usuario));
         return peticionCorrecta();
     }
 

@@ -23,7 +23,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
 public class JWTAuthorizationFilter extends OncePerRequestFilter {

@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.password;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,18 +7,14 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListPasswordByCategoryRequest {
+public class ListPasswordRequest {
 
     @Getter
     @Setter
     private String masterPassword;
 
-    @Getter
-    @Setter
-    private Long idCat;
-
     public boolean isValid(){
-        return masterPassword!=null && !masterPassword.isEmpty() && idCat!=null;
+        return masterPassword!=null && !masterPassword.isEmpty();
     }
 }
 

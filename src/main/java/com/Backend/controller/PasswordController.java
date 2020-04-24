@@ -7,7 +7,11 @@ import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
-import com.Backend.model.request.*;
+import com.Backend.model.request.pandora.GeneratePasswordRequest;
+import com.Backend.model.request.password.InsertPasswordRequest;
+import com.Backend.model.request.password.ListPasswordByCategoryRequest;
+import com.Backend.model.request.password.ListPasswordRequest;
+import com.Backend.model.request.password.ModifyPasswordRequest;
 import com.Backend.model.response.PasswordResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
@@ -28,7 +32,7 @@ import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
-import static com.Backend.utils.PasswordUtils.generateStrongPassword;
+import static com.Backend.utils.PasswordCheckUtils.generateStrongPassword;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
 @RestController
@@ -92,30 +96,24 @@ public class PasswordController {
         try {
             User user = getUserFromRequest(request, repoUser);
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-
-            JSONArray allpass = new JSONArray();
             TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
-            for (OwnsPassword i : allops) {
-                // En el constructor se calcula los días de diferencia.
-                PasswordResponse pres = new PasswordResponse(i);
-                JSONObject a = new JSONObject();
-                a.put("passId", pres.getPassId());
-                a.put("passwordName", pres.getPasswordName());
-                a.put("catId", pres.getCatId());
-                a.put("categoryName", pres.getCategoryName());
-                a.put("rol", pres.getRol());
-                a.put("optionalText", pres.getOptionalText());
-                a.put("userName", pres.getUserName());
-                a.put("password", textEncryptor.decrypt(pres.getPassword()));
-                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
-                allpass.add(a);
-            }
-            res.put("passwords", allpass);
-            return ResponseEntity.status(HttpStatus.OK).body(res);
+            return getRespuestaListar(res, allops, textEncryptor);
 
         } catch (UserNotFoundException e) {
             return peticionErronea("Usuario no existente.");
         }
+    }
+
+    public ResponseEntity<JSONObject> getRespuestaListar(JSONObject res, List<OwnsPassword> allops, TextEncryptor textEncryptor) {
+        JSONArray allpass = new JSONArray();
+        for (OwnsPassword i : allops) {
+            // En el constructor se calcula los días de diferencia.
+            PasswordResponse pres = new PasswordResponse(i);
+            JSONObject a = generarJSONPassword(pres, textEncryptor);
+            allpass.add(a);
+        }
+        res.put("passwords", allpass);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
@@ -128,26 +126,8 @@ public class PasswordController {
         try {
             User user = getUserFromRequest(request, repoUser);
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-
-            JSONArray allpass = new JSONArray();
             TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
-            for (OwnsPassword i : allops) {
-                // En el constructor se calcula los días de diferencia.
-                PasswordResponse pres = new PasswordResponse(i);
-                JSONObject a = new JSONObject();
-                a.put("passId", pres.getPassId());
-                a.put("passwordName", pres.getPasswordName());
-                a.put("catId", pres.getCatId());
-                a.put("categoryName", pres.getCategoryName());
-                a.put("rol", pres.getRol());
-                a.put("optionalText", pres.getOptionalText());
-                a.put("userName", pres.getUserName());
-                a.put("password", textEncryptor.decrypt(pres.getPassword()));
-                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
-                allpass.add(a);
-            }
-            res.put("passwords", allpass);
-            return ResponseEntity.status(HttpStatus.OK).body(res);
+            return getRespuestaListar(res, allops, textEncryptor);
 
         } catch (UserNotFoundException e) {
             return peticionErronea("Usuario no existente.");
@@ -170,17 +150,8 @@ public class PasswordController {
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
-                if (pres.getCatId() != passReq.getIdCat()) continue;
-                JSONObject a = new JSONObject();
-                a.put("passId", pres.getPassId());
-                a.put("passwordName", pres.getPasswordName());
-                a.put("catId", pres.getCatId());
-                a.put("categoryName", pres.getCategoryName());
-                a.put("rol", pres.getRol());
-                a.put("optionalText", pres.getOptionalText());
-                a.put("userName", pres.getUserName());
-                a.put("password", textEncryptor.decrypt(pres.getPassword()));
-                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+                if (!pres.getCatId().equals(passReq.getIdCat())) continue;
+                JSONObject a = generarJSONPassword(pres, textEncryptor);
                 allpass.add(a);
             }
             res.put("passwords", allpass);
@@ -208,17 +179,8 @@ public class PasswordController {
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
-                if (pres.getCatId() != idCat) continue;
-                JSONObject a = new JSONObject();
-                a.put("passId", pres.getPassId());
-                a.put("passwordName", pres.getPasswordName());
-                a.put("catId", pres.getCatId());
-                a.put("categoryName", pres.getCategoryName());
-                a.put("rol", pres.getRol());
-                a.put("optionalText", pres.getOptionalText());
-                a.put("userName", pres.getUserName());
-                a.put("password", textEncryptor.decrypt(pres.getPassword()));
-                a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+                if (!pres.getCatId().equals(idCat)) continue;
+                JSONObject a = generarJSONPassword(pres, textEncryptor);
                 allpass.add(a);
             }
             res.put("passwords", allpass);
@@ -279,8 +241,11 @@ public class PasswordController {
             if (passReq.getPasswordName() != null) {
                 List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
                 for (OwnsPassword i : allops) {
-                    if(i.getPassword().getId() != idPass){
-                        if ((i.getPassword()).getPasswordName().equals(passReq.getPasswordName())) {
+                    if(!i.getPassword().getId().equals(idPass)){
+                        // Tendrá el mismo nombre que esa misma contraseña si no se quiere cambiar
+                        // el nombre, obviamente debe permitirse
+                        if ((i.getPassword()).getPasswordName().equals(passReq.getPasswordName())
+                                && !i.getPassword().getId().equals(passReq.getId())) {
                             return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                         }
                     }
@@ -325,6 +290,22 @@ public class PasswordController {
         else{
             return peticionErronea("Parámetros incorrectos.");
         }
+    }
 
+    public JSONObject generarJSONPassword(PasswordResponse pres, TextEncryptor textEncryptor){
+        JSONObject a = new JSONObject();
+        a.put("passId", pres.getPassId());
+        a.put("passwordName", pres.getPasswordName());
+        a.put("catId", pres.getCatId());
+        a.put("categoryName", pres.getCategoryName());
+        a.put("rol", pres.getRol());
+        a.put("optionalText", pres.getOptionalText());
+        a.put("userName", pres.getUserName());
+        if(pres.getRol() == 1)
+            a.put("password", textEncryptor.decrypt(pres.getPassword()));
+        else
+            a.put("password", pres.getPassword());
+        a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+        return a;
     }
 }

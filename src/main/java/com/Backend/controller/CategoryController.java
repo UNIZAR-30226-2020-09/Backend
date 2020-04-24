@@ -3,15 +3,13 @@ package com.Backend.controller;
 import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
+import com.Backend.model.Password;
 import com.Backend.model.User;
-import com.Backend.model.request.DeleteByIdRequest;
-import com.Backend.model.request.InsertCategoryRequest;
-import com.Backend.model.request.ModifyCategoryRequest;
+import com.Backend.model.request.category.InsertCategoryRequest;
+import com.Backend.model.request.category.ModifyCategoryRequest;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
-import com.Backend.utils.CategoryUtils;
-import com.Backend.utils.PasswordUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static com.Backend.utils.CategoryUtils.getSinCategoria;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
@@ -73,7 +70,7 @@ public class CategoryController {
         try {
             Category cat = repoCat.findById(id).orElseThrow(() -> new CategoryNotFoundException(id));
             if (cat.getUsuario().getId().equals(usuario.getId()) && !cat.equals(getSinCategoria(repoCat, usuario))) {
-                PasswordUtils.modifyPasswordsAtCategoryDelete(cat, repoPass, repoCat, cat.getUsuario());
+                modifyPasswordsAtCategoryDelete(cat, repoPass, repoCat, cat.getUsuario());
                 repoCat.deleteById(cat.getId());
                 return peticionCorrecta();
             } else
@@ -89,7 +86,7 @@ public class CategoryController {
         User usuario = getUserFromRequest(request, repoUser);
         List<Category> categorias = repoCat.findByUsuario(usuario);
 
-        JSONArray jsa = CategoryUtils.arrayCategorias(categorias, true);
+        JSONArray jsa = arrayCategorias(categorias);
 
         JSONObject res = new JSONObject();
         res.put("categories", jsa);
@@ -113,6 +110,34 @@ public class CategoryController {
             }
         } else
             return peticionErronea("No se permiten campos nulos.");
+    }
+
+    public void modifyPasswordsAtCategoryDelete(Category cat, IPassRepo repoPass,
+                                                       ICatRepo repoCat, User usuario){
+        List<Password> passwords = repoPass.findByCategory(cat);
+        Category sinCat = getSinCategoria(repoCat,usuario);
+
+        for(Password pass : passwords){
+            pass.setCategory(sinCat);
+            repoPass.save(pass);
+        }
+    }
+
+    public static JSONArray arrayCategorias(List<Category> categorias){
+        JSONArray jsa = new JSONArray();
+        for (Category cat : categorias) {
+            JSONObject obj = new JSONObject();
+            obj.put("catId", cat.getId());
+            obj.put("categoryName", cat.getCategoryName());
+            jsa.add(obj);
+        }
+        return jsa;
+    }
+
+    //Primera en crearse al crear usuario, menor id
+    public static Category getSinCategoria(ICatRepo repoCat, User usuario) {
+        List<Category> categorias = repoCat.findByUsuarioOrderByIdAsc(usuario);
+        return categorias.get(0);
     }
 
 }

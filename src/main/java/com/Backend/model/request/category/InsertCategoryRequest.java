@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

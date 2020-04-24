@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.password;
 
 import com.Backend.model.Password;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,8 @@ public class InsertPasswordRequest {
         return masterPassword!=null && !masterPassword.isEmpty() &&
                 password!=null && !password.isEmpty() &&
                 passwordName!=null && !passwordName.isEmpty() &&
-                expirationTime != null && passwordCategoryId != null;
+                expirationTime != null && passwordCategoryId != null &&
+                expirationTime > 0;
     }
 
     public Password getAsPassword() {

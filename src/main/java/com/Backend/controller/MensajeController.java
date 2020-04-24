@@ -1,6 +1,6 @@
 package com.Backend.controller;
 
-import com.Backend.model.request.MessageRequest;
+import com.Backend.model.request.message.MessageRequest;
 import com.Backend.repository.IMensajeRepo;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
 
 @RestController
 public class MensajeController {

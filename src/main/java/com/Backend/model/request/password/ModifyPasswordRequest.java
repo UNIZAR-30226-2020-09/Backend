@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.password;
 
 import com.Backend.model.Password;
 import lombok.AllArgsConstructor;

@@ -1,31 +1,27 @@
 package com.Backend.controller;
 
 
-import com.Backend.model.Category;
-import com.Backend.model.User;
 import com.Backend.model.request.*;
+import com.Backend.model.request.pandora.GeneratePasswordRequest;
+import com.Backend.model.request.password.InsertPasswordRequest;
+import com.Backend.model.request.password.ListPasswordRequest;
+import com.Backend.model.request.password.ModifyPasswordRequest;
+import com.Backend.model.request.user.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.Setter;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Map;
 
-import static com.Backend.controller.CategoryController.INSERTAR_CATEGORIA_URL;
 import static com.Backend.controller.CategoryController.LISTAR_CATEGORIAS_USUARIO_URL;
 import static com.Backend.controller.PasswordController.*;
-import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
-import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.LOGIN_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.REGISTRO_USUARIO_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 

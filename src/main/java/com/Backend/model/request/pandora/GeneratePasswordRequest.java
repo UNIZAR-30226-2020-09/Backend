@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.pandora;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
