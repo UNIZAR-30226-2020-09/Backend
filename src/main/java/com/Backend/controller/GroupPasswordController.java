@@ -96,7 +96,7 @@ public class GroupPasswordController {
                                 () -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
                         if(esPropietarioDeCat(user, cat)){
                             password.setCategory(cat);
-                        } else { 
+                        } else {
                             peticionErronea("No eres propietario de la categoría");
                         }
                     }
