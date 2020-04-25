@@ -1,11 +1,8 @@
 package com.Backend.model.request.groupPassword;
 
-import com.Backend.model.Password;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.crypto.encrypt.Encryptors;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.util.LinkedList;
 
@@ -53,7 +50,6 @@ public class ModifyGroupPasswordRequest {
     public boolean isValid(){
         return  password!=null && !password.isEmpty() &&
                 passwordName!=null && !passwordName.isEmpty() &&
-                expirationTime != null && passwordCategoryId != null
-                && !usuarios.isEmpty();
+                expirationTime != null && passwordCategoryId != null;
     }
 }

@@ -64,6 +64,5 @@ public class Password {
         this.passwordName = passwordName;
         this.expirationTime = LocalDate.now();
         this.expirationTime = this.expirationTime.plusDays(expirationTime);
-        System.out.println(this.expirationTime);
     }
 }

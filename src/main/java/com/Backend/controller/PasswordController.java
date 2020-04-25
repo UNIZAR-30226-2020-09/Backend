@@ -32,6 +32,7 @@ import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.PasswordCheckUtils.generarJSONPassword;
 import static com.Backend.utils.PasswordCheckUtils.generateStrongPassword;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
@@ -76,7 +77,7 @@ public class PasswordController {
                 }
             }
             repoPass.save(password);
-            OwnsPassword ownsp = new OwnsPassword(user, password, 1);
+            OwnsPassword ownsp = new OwnsPassword(user, password, 1, 0);
             repoOwnsPass.save(ownsp);
             return ResponseEntity.status(HttpStatus.OK).body(res);
         } catch (UserNotFoundException e) {
@@ -92,25 +93,28 @@ public class PasswordController {
         if (!passReq.isValid()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
         }
-        JSONObject res = new JSONObject();
         try {
             User user = getUserFromRequest(request, repoUser);
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
-            return getRespuestaListar(res, allops, textEncryptor);
+            return getRespuestaListar(allops, textEncryptor, user);
 
         } catch (UserNotFoundException e) {
             return peticionErronea("Usuario no existente.");
         }
     }
 
-    public ResponseEntity<JSONObject> getRespuestaListar(JSONObject res, List<OwnsPassword> allops, TextEncryptor textEncryptor) {
+    public ResponseEntity<JSONObject> getRespuestaListar(List<OwnsPassword> allops,
+                                                         TextEncryptor textEncryptor, User user) {
+        JSONObject res = new JSONObject();
         JSONArray allpass = new JSONArray();
         for (OwnsPassword i : allops) {
-            // En el constructor se calcula los días de diferencia.
-            PasswordResponse pres = new PasswordResponse(i);
-            JSONObject a = generarJSONPassword(pres, textEncryptor);
-            allpass.add(a);
+            // En el constructor se calcula los días de diferencia. Solo si no es compartida
+            if(i.getGrupo()==0) {
+                PasswordResponse pres = new PasswordResponse(i);
+                JSONObject a = generarJSONPassword(pres, textEncryptor);
+                allpass.add(a);
+            }
         }
         res.put("passwords", allpass);
         return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -122,12 +126,11 @@ public class PasswordController {
         if(masterPassword == null || masterPassword.isEmpty()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
         }
-        JSONObject res = new JSONObject();
         try {
             User user = getUserFromRequest(request, repoUser);
             List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
             TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
-            return getRespuestaListar(res, allops, textEncryptor);
+            return getRespuestaListar(allops, textEncryptor, user);
 
         } catch (UserNotFoundException e) {
             return peticionErronea("Usuario no existente.");
@@ -149,10 +152,12 @@ public class PasswordController {
             TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
-                PasswordResponse pres = new PasswordResponse(i);
-                if (!pres.getCatId().equals(passReq.getIdCat())) continue;
-                JSONObject a = generarJSONPassword(pres, textEncryptor);
-                allpass.add(a);
+                if(i.getGrupo()==0) {
+                    PasswordResponse pres = new PasswordResponse(i);
+                    if (!pres.getCatId().equals(passReq.getIdCat())) continue;
+                    JSONObject a = generarJSONPassword(pres, textEncryptor);
+                    allpass.add(a);
+                }
             }
             res.put("passwords", allpass);
             return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -178,10 +183,12 @@ public class PasswordController {
             TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
             for (OwnsPassword i : allops) {
                 // En el constructor se calcula los días de diferencia.
-                PasswordResponse pres = new PasswordResponse(i);
-                if (!pres.getCatId().equals(idCat)) continue;
-                JSONObject a = generarJSONPassword(pres, textEncryptor);
-                allpass.add(a);
+                if(i.getGrupo()==0) {
+                    PasswordResponse pres = new PasswordResponse(i);
+                    if (!pres.getCatId().equals(idCat)) continue;
+                    JSONObject a = generarJSONPassword(pres, textEncryptor);
+                    allpass.add(a);
+                }
             }
             res.put("passwords", allpass);
             return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -290,22 +297,5 @@ public class PasswordController {
         else{
             return peticionErronea("Parámetros incorrectos.");
         }
-    }
-
-    public JSONObject generarJSONPassword(PasswordResponse pres, TextEncryptor textEncryptor){
-        JSONObject a = new JSONObject();
-        a.put("passId", pres.getPassId());
-        a.put("passwordName", pres.getPasswordName());
-        a.put("catId", pres.getCatId());
-        a.put("categoryName", pres.getCategoryName());
-        a.put("rol", pres.getRol());
-        a.put("optionalText", pres.getOptionalText());
-        a.put("userName", pres.getUserName());
-        if(pres.getRol() == 1)
-            a.put("password", textEncryptor.decrypt(pres.getPassword()));
-        else
-            a.put("password", pres.getPassword());
-        a.put("noDaysBeforeExpiration", pres.getExpirationDate());
-        return a;
     }
 }
