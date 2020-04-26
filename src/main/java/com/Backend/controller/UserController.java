@@ -13,6 +13,7 @@ import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.jboss.aerogear.security.otp.Totp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +85,44 @@ public class UserController {
         }
         String token = getJWTToken(recuperado, recuperado.getMasterPassword());
         res.put("token", token);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @PostMapping("/api/usuarios/loginCon2FA")
+    public ResponseEntity<JSONObject> loginCon2FA(@RequestBody UserLoginRequest userLogReq) {
+        JSONObject res = new JSONObject();
+        if (!userLogReq.isValid()){
+            return peticionErronea("Los campos no pueden quedar vacíos");
+        }
+        if(!repo.existsByMail(userLogReq.getMail())) {
+            return peticionErronea("Usuario inexistente.");
+        }
+        User recuperado = repo.findByMail(userLogReq.getMail());
+        BCryptPasswordEncoder b = new BCryptPasswordEncoder();
+
+        if (!b.matches(userLogReq.getMasterPassword(), recuperado.getMasterPassword())) {
+            return peticionErronea("Credenciales incorrectos.");
+        }
+
+        Totp totp = new Totp(recuperado.getSecret());
+        if (!isValidLong(userLogReq.getVerificationCode()) || !totp.verify(userLogReq.getVerificationCode())) {
+            return peticionErronea("Credenciales incorrectos.");
+        }
+
+        String token = getJWTToken(recuperado);
+        res.put("token", token);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @GetMapping("/api/usuarios/get2FAkey")
+    public ResponseEntity<JSONObject> get2FAkey(HttpServletRequest request) throws UserNotFoundException {
+        Long id = getUserIdFromRequest(request);
+        JSONObject res = new JSONObject();
+        if (!repo.existsById(id)) {
+            return peticionErronea("El usuario inexistente.");
+        }
+        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        res.put("key", usuario.getSecret());
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
@@ -170,5 +209,14 @@ public class UserController {
         JSONObject res = new JSONObject();
         res.put("users", array);
         return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    private boolean isValidLong(String code) {
+        try {
+            Long.parseLong(code);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 }
