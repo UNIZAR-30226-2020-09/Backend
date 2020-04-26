@@ -4,6 +4,7 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.User;
+import com.Backend.model.request.UserLoginRequest;
 import com.Backend.model.request.user.ModifyUserRequest;
 import com.Backend.model.request.user.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
@@ -109,7 +110,7 @@ public class UserController {
             return peticionErronea("Credenciales incorrectos.");
         }
 
-        String token = getJWTToken(recuperado);
+        String token = getJWTToken(recuperado, userLogReq.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
