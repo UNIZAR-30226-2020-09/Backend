@@ -30,7 +30,7 @@ public class Password {
 
     @Getter
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     private String password;
 
     @Getter
