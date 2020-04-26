@@ -58,5 +58,9 @@ public class User {
         this.mail = mail;
         this.secret = Base32.random();
     }
+
+    public void update2FA(){
+        this.secret = Base32.random();
+    }
 }
 

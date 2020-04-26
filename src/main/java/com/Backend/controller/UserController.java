@@ -123,6 +123,9 @@ public class UserController {
             return peticionErronea("El usuario inexistente.");
         }
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        usuario.update2FA();
+        repo.save(usuario);
+
         res.put("key", usuario.getSecret());
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
