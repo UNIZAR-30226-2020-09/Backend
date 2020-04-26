@@ -1,4 +1,4 @@
-package com.Backend.model.request;
+package com.Backend.model.request.message;
 
 import com.Backend.model.Message;
 import lombok.AllArgsConstructor;

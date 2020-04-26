@@ -1,25 +1,22 @@
 package com.Backend.controller;
 
-import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.request.user.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
 
-import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
-import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.LOGIN_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.REGISTRO_USUARIO_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserControllerTest {

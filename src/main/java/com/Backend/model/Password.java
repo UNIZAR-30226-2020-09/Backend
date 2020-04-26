@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,7 +48,7 @@ public class Password {
 
     @Getter
     @Setter
-    Integer expirationTime;
+    LocalDate expirationTime;
 
 
     /* Relación 1:N con categoría, extremo de la N */
@@ -59,6 +62,8 @@ public class Password {
     public Password(String password, String passwordName, Integer expirationTime) {
         this.password = password;
         this.passwordName = passwordName;
-        this.expirationTime = expirationTime;
+        this.expirationTime = LocalDate.now();
+        this.expirationTime = this.expirationTime.plusDays(expirationTime);
+        System.out.println(this.expirationTime);
     }
 }

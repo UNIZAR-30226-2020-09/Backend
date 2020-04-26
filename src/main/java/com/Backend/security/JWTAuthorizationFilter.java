@@ -9,6 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.User;
+import com.Backend.repository.IUserRepo;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,9 +23,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
+import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
+    private IUserRepo repo;
+
+    public JWTAuthorizationFilter(IUserRepo repo){
+        this.repo = repo;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -30,13 +40,18 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             if (existeJWTToken(request, response)) {
                 Claims claims = validateToken(request);
                 if (claims.get("authorities") != null) {
-                    setUpSpringAuthentication(claims);
+                    User user = getUserFromRequest(request, repo);
+                    if(claims.get("hash").equals(user.getMasterPassword())) {
+                        setUpSpringAuthentication(claims);
+                    } else {
+                        SecurityContextHolder.clearContext();
+                    }
                 } else {
                     SecurityContextHolder.clearContext();
                 }
             }
             chain.doFilter(request, response);
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | UserNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
         }

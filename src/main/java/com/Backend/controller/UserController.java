@@ -4,8 +4,8 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
 import com.Backend.model.User;
-import com.Backend.model.request.UserLoginRequest;
-import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.request.user.ModifyUserRequest;
+import com.Backend.model.request.user.UserRegisterRequest;
 import com.Backend.model.response.UserResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
@@ -21,13 +21,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
-import static com.Backend.utils.PasswordUtils.modifyPasswordsAtCategoryDelete;
 import static com.Backend.utils.TokenUtils.*;
 
 @RestController
@@ -35,10 +33,11 @@ import static com.Backend.utils.TokenUtils.*;
 public class UserController {
 
     /* URLs que no son accesibles desde ninguna otra clase */
-    public static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
-    public static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
-    public static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
-    public static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
+    private static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
+    private static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
+    private static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
+    private static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
+    private static final String MODIFICAR_USUARIO_URL = "/api/usuarios/modificar";
 
     @Autowired
     IUserRepo repo;
@@ -63,6 +62,9 @@ public class UserController {
         // Si no buscas un usuario con id falla la inserción.
         User usuario = repo.findByMail(userRegReq.getMail());
         repoCat.save(new Category("Sin categoría", usuario));
+        repoCat.save(new Category("Redes Sociales", usuario));
+        repoCat.save(new Category("Cuentas bancarias", usuario));
+        repoCat.save(new Category("Tarjetas de crédito", usuario));
         return peticionCorrecta();
     }
 
@@ -81,7 +83,7 @@ public class UserController {
         if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
         }
-        String token = getJWTToken(recuperado);
+        String token = getJWTToken(recuperado, recuperado.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
@@ -132,7 +134,7 @@ public class UserController {
             return peticionErronea("El usuario inexistente.");
         }
         User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        String token = getJWTToken(usuario);
+        String token = getJWTToken(usuario, usuario.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
@@ -169,6 +171,33 @@ public class UserController {
         //cascada hacia categorías, que ya no tienen contraseñas
         repo.deleteById(user.getId());
         return peticionCorrecta();
+    }
+
+    @PostMapping(MODIFICAR_USUARIO_URL)
+    public ResponseEntity<JSONObject> modify(HttpServletRequest request,
+                                             @RequestBody ModifyUserRequest userModReq) throws UserNotFoundException {
+
+        if (!userModReq.isValid()) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        User userId = getUserFromRequest(request, repo);
+        if (!repo.existsById(userId.getId())) {
+            return peticionErronea("Usuario inexistente.");
+        }
+        User fetchedUser = repo.findById(userId.getId()).orElseThrow(() -> new UserNotFoundException(userId.getId()));
+        BCryptPasswordEncoder b = new BCryptPasswordEncoder();
+        if (b.matches(userModReq.getOldMasterPassword(), fetchedUser.getMasterPassword())
+                && fetchedUser.getMail().equals(userModReq.getMail())) {
+
+            String newHashedPassword = b.encode(userModReq.getNewMasterPassword());
+            fetchedUser.setMasterPassword(newHashedPassword);
+            repo.save(fetchedUser);
+            JSONObject res = new JSONObject();
+            res.put("token", getJWTToken(fetchedUser, newHashedPassword));
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+        } else {
+            return peticionErronea("Credenciales incorrectos.");
+        }
     }
 
     @GetMapping(CONSULTAR_TODOS_USUARIOS_URL)

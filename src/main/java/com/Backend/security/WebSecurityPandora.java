@@ -1,5 +1,7 @@
 package com.Backend.security;
 
+import com.Backend.repository.IUserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,20 +14,24 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.google.common.collect.ImmutableList;
 
-import static com.Backend.security.Constants.*;
+import static com.Backend.security.SecurityConstants.*;
 
 @EnableWebSecurity
 @Configuration
 class WebSecurityPandora extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    IUserRepo repository;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-                .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JWTAuthorizationFilter(repository), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, ESTADISTICAS).permitAll()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
+                .antMatchers(HttpMethod.GET, ROBUSTEZ).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
                 .antMatchers(HttpMethod.POST,CONTACTO_URL).permitAll()
                 .anyRequest().authenticated();

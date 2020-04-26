@@ -2,30 +2,27 @@ package com.Backend.controller;
 
 import com.Backend.model.Category;
 import com.Backend.model.request.DeleteByIdRequest;
-import com.Backend.model.request.InsertCategoryRequest;
-import com.Backend.model.request.ModifyCategory;
-import com.Backend.model.request.UserRegisterRequest;
+import com.Backend.model.request.category.InsertCategoryRequest;
+import com.Backend.model.request.category.ModifyCategoryRequest;
+import com.Backend.model.request.user.UserRegisterRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.Backend.security.Constants.LOGIN_USUARIO_URL;
-import static com.Backend.security.Constants.REGISTRO_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.LOGIN_USUARIO_URL;
+import static com.Backend.security.SecurityConstants.REGISTRO_USUARIO_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CategoryControllerTest {
@@ -48,7 +45,7 @@ class CategoryControllerTest {
     static DeleteByIdRequest cat1Id;
     static DeleteByIdRequest cat2Id;
 
-    static ModifyCategory modcat2;
+    static ModifyCategoryRequest modcat2;
 
     private String url = "http://localhost:8080";
     static HttpHeaders tokenHeaders;
@@ -56,7 +53,7 @@ class CategoryControllerTest {
     static String token;
 
     @BeforeAll
-    static void preparacion() throws JsonProcessingException{
+    static void preparacion() {
         basicHeaders = new HttpHeaders();
         basicHeaders.setContentType(MediaType.APPLICATION_JSON);
         user1 = new UserRegisterRequest("user1@test.com","Usuario1");
@@ -145,7 +142,7 @@ class CategoryControllerTest {
 
         JSONObject cat2 = get_category(2);
 
-        modcat2 = new ModifyCategory(((Number)cat2.get("catId")).longValue(), "categ2MOD");
+        modcat2 = new ModifyCategoryRequest(((Number)cat2.get("catId")).longValue(), "categ2MOD");
         HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(modcat2), tokenHeaders);
         ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + MODIFICAR_CATEGORIAS_USUARIO_URL, entity, JSONObject.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -178,13 +175,13 @@ class CategoryControllerTest {
     }
 
     void create_user_and_login() throws JsonProcessingException {
-        if(token == "") {
-            HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
+        if(token.equals("")) {
+            HttpEntity<String> entity  = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
             ResponseEntity<JSONObject> response = restTemplate.postForEntity(url + REGISTRO_USUARIO_URL, entity, JSONObject.class);
-
-            entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
+            entity  = new HttpEntity<>(new ObjectMapper().writeValueAsString(user1), basicHeaders);
             response = restTemplate.postForEntity(url + LOGIN_USUARIO_URL, entity, JSONObject.class);
             token = response.getBody().getAsString("token");
+            System.out.println(token);
             tokenHeaders = headerFromToken(token);
         }
     }

@@ -11,9 +11,6 @@ import javax.persistence.*;
 @Table
 public class OwnsPassword {
 
-    /*
-     * Decisión tomada, clase compuesta con IdClass o con Embedded class.
-     */
     /* Clave compuesta */
     @EmbeddedId
     @Getter

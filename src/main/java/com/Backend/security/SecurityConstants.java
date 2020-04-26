@@ -1,6 +1,6 @@
 package com.Backend.security;
 
-public class Constants {
+public class SecurityConstants {
 
     // UNICAMENTE COLOCAR EN ÉSTA CLASE URL Y STRINGS QUE APAREZCAN EN VARIOS PUNTOS
     // DEL PROGRAMA, EL RESTO EN SUS RESPECTIVAS CLASES
@@ -9,6 +9,7 @@ public class Constants {
     public static final String CONSULTAR_TODOS_USUARIOS_URL = "/api/usuarios/consultarTodos";
     public static final String CONTACTO_URL = "/api/mensaje";
     public static final String ESTADISTICAS = "/api/estadisticas";
+    public static final String ROBUSTEZ = "/api/robustez";
 
     //Recomendable dejarlo así, según el estándar
     public static final String HEADER_AUTHORIZATION_KEY = "Authorization";

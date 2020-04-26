@@ -1,25 +1,19 @@
 package com.Backend.controller;
 
-import com.Backend.exception.UserNotFoundException;
-import com.Backend.model.User;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IMensajeRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import com.Backend.utils.PasswordCheckUtils;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.List;
-
-import static com.Backend.security.Constants.ESTADISTICAS;
-import static com.Backend.utils.TokenUtils.getJWTToken;
-import static com.Backend.utils.TokenUtils.getUserIdFromRequest;
+import static com.Backend.security.SecurityConstants.ESTADISTICAS;
+import static com.Backend.security.SecurityConstants.ROBUSTEZ;
 
 @RestController
 public class PandoraController {
@@ -34,7 +28,7 @@ public class PandoraController {
     IMensajeRepo repoMsg;
 
     @GetMapping(ESTADISTICAS)
-    public ResponseEntity<JSONObject> stats(HttpServletRequest request) {
+    public ResponseEntity<JSONObject> stats() {
 
         int numUsers = repoUser.findAll().size();
         int numCat = repoCat.findAll().size();
@@ -46,6 +40,15 @@ public class PandoraController {
         res.put("nCat", numCat);
         res.put("nMsgs", numMsgs);
 
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @GetMapping(ROBUSTEZ)
+    public ResponseEntity<JSONObject> isStrong(@RequestParam String password) {
+        int puntuacion = PasswordCheckUtils.gradoRobustez(password);
+        JSONObject res = new JSONObject();
+        res.put("puntuacion" , puntuacion);
+        res.put("password" , password);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
