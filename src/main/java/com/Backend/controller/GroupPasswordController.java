@@ -143,13 +143,36 @@ public class GroupPasswordController {
         }
     }
 
-    /*@DeleteMapping(ELIMINAR_GROUP_PASSWORD_URL)
+    @DeleteMapping(ELIMINAR_GROUP_PASSWORD_URL)
     public ResponseEntity<JSONObject> eliminar_group_password(HttpServletRequest request,
                                                @RequestParam Long id){
 
-        PasswordController groupPassword = new PasswordController();
-        return groupPassword.eliminar(request, id);
-    }*/
+        JSONObject res = new JSONObject();
+        if (id == null) {
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        try {
+            User user = getUserFromRequest(request, repoUser);
+
+            Password password = repoPass.findById(id).orElseThrow(() -> new PasswordNotFoundException(id));
+            OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
+
+            if (ops.getRol() == 1) {
+                repoPass.delete(password);
+            } else {
+                //No eres el usuario creador
+                repoOwnsPass.delete(ops);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+        } catch (UserNotFoundException e) {
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        } catch (PasswordNotFoundException e) {
+            res.put("statusText", "Contraseña no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+    }
 
     // Devuelve una respuesta a peticion http con todas las passwords que hayan sido compartidas.
     public ResponseEntity<JSONObject> getGroupPasswords(List<OwnsPassword> ownspass, TextEncryptor enc, User user){
