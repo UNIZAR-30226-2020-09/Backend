@@ -47,6 +47,9 @@ public class TFAController {
         if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
         }
+        if (recuperado.getLoggedIn2FA() == true){
+            return peticionErronea("Ya se ha iniciado sesión en otro dispositivo.");
+        }
         recuperado.setLoggedIn2FA(true);
         repo.save(recuperado);
         String token = getJWTToken(recuperado, recuperado.getMasterPassword());

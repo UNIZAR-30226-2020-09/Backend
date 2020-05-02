@@ -33,6 +33,7 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
                 //Solo puede quedar la de abajo
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO2FA_URL).permitAll()
+                .antMatchers(HttpMethod.POST,LOGIN_2FA_URL).permitAll()
                 .antMatchers(HttpMethod.GET, ROBUSTEZ).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
                 .antMatchers(HttpMethod.POST,CONTACTO_URL).permitAll()
