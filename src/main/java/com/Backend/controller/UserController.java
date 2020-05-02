@@ -117,27 +117,18 @@ public class UserController {
 
     @GetMapping("/api/usuarios/get2FAkey")
     public ResponseEntity<JSONObject> get2FAkey(HttpServletRequest request) throws UserNotFoundException {
-        Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (!repo.existsById(id)) {
-            return peticionErronea("El usuario inexistente.");
-        }
-        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User usuario = getUserFromRequest(request, repo);
         usuario.update2FA();
         repo.save(usuario);
-
         res.put("key", usuario.getSecret());
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping(TOKEN_USUARIO_URL)
     public ResponseEntity<JSONObject> token(HttpServletRequest request) throws UserNotFoundException {
-        Long id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
-        if (!repo.existsById(id)) {
-            return peticionErronea("El usuario inexistente.");
-        }
-        User usuario = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User usuario = getUserFromRequest(request, repo);
         String token = getJWTToken(usuario, usuario.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -158,10 +149,6 @@ public class UserController {
     @DeleteMapping(ELIMINAR_USUARIO_URL)
     public ResponseEntity<JSONObject> eliminar(HttpServletRequest request) throws UserNotFoundException {
         User user = getUserFromRequest(request, repo);
-        if (!repo.existsById(user.getId())) {
-            return peticionErronea("Usuario inexistente.");
-        }
-
         List<OwnsPassword> ownpass = repoOwns.findAllByUser(user);
         for (OwnsPassword owp : ownpass){
             if(owp.getRol() == 1){
@@ -184,11 +171,7 @@ public class UserController {
         if (!userModReq.isValid()) {
             return peticionErronea("Los campos no pueden quedar vacíos.");
         }
-        User userId = getUserFromRequest(request, repo);
-        if (!repo.existsById(userId.getId())) {
-            return peticionErronea("Usuario inexistente.");
-        }
-        User fetchedUser = repo.findById(userId.getId()).orElseThrow(() -> new UserNotFoundException(userId.getId()));
+        User fetchedUser = getUserFromRequest(request, repo);
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
         if (b.matches(userModReq.getOldMasterPassword(), fetchedUser.getMasterPassword())
                 && fetchedUser.getMail().equals(userModReq.getMail())) {
