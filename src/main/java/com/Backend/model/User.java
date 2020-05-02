@@ -40,6 +40,10 @@ public class User {
     @Setter
     private String secret;
 
+    @Getter
+    @Setter
+    private Boolean loggedIn2FA;
+
     /*
      * @OneToMany( mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true) ¿En cascada?
      * Relación 1:N con la tabla entre User y Password, extremo del 1
@@ -56,11 +60,12 @@ public class User {
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;
         this.mail = mail;
-        this.secret = Base32.random();
+        this.secret = Base32.random().substring(0, 5);;
+        this.loggedIn2FA = false;
     }
 
-    public void update2FA(){
-        this.secret = Base32.random();
+    public void updateSecret(){
+        this.secret = Base32.random().substring(0, 5);
     }
 }
 

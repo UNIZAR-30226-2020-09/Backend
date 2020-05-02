@@ -39,7 +39,7 @@ public class UserController {
     private static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
     private static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
     private static final String MODIFICAR_USUARIO_URL = "/api/usuarios/modificar";
-
+    private static final String LOGIN_USUARIO2FA_URL = "/api/usuarios/loginCon2FA";
     @Autowired
     IUserRepo repo;
     @Autowired
@@ -89,7 +89,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @PostMapping("/api/usuarios/loginCon2FA")
+    @PostMapping()
     public ResponseEntity<JSONObject> loginCon2FA(@RequestBody UserLoginRequest userLogReq) {
         JSONObject res = new JSONObject();
         if (!userLogReq.isValid()){
@@ -119,7 +119,7 @@ public class UserController {
     public ResponseEntity<JSONObject> get2FAkey(HttpServletRequest request) throws UserNotFoundException {
         JSONObject res = new JSONObject();
         User usuario = getUserFromRequest(request, repo);
-        usuario.update2FA();
+        usuario.updateSecret();
         repo.save(usuario);
         res.put("key", usuario.getSecret());
         return ResponseEntity.status(HttpStatus.OK).body(res);
