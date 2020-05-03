@@ -42,6 +42,10 @@ public class User {
 
     @Getter
     @Setter
+    private Long secretExpirationTime;
+
+    @Getter
+    @Setter
     private Boolean loggedIn2FA;
 
     /*
@@ -60,12 +64,14 @@ public class User {
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;
         this.mail = mail;
-        this.secret = Base32.random().substring(0, 5);;
+        this.secret = Base32.random().substring(0, 5);
+        this.secretExpirationTime = System.currentTimeMillis() + 10000;
         this.loggedIn2FA = false;
     }
 
     public void updateSecret(){
         this.secret = Base32.random().substring(0, 5);
+        this.secretExpirationTime = System.currentTimeMillis() + 10000;
     }
 }
 

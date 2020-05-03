@@ -89,7 +89,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @PostMapping()
+    @PostMapping(LOGIN_USUARIO2FA_URL)
     public ResponseEntity<JSONObject> loginCon2FA(@RequestBody UserLoginRequest userLogReq) {
         JSONObject res = new JSONObject();
         if (!userLogReq.isValid()){
@@ -106,8 +106,12 @@ public class UserController {
         }
 
         Totp totp = new Totp(recuperado.getSecret());
-        if (!isValidLong(userLogReq.getVerificationCode()) || !totp.verify(userLogReq.getVerificationCode())) {
+        if (!isValidLong(userLogReq.getVerificationCode()) ||
+                !totp.verify(userLogReq.getVerificationCode())) {
             return peticionErronea("Credenciales incorrectos.");
+        }
+        if (recuperado.getSecretExpirationTime() > System.currentTimeMillis() ){
+            return peticionErronea("Codigo 2FA expirado.");
         }
 
         String token = getJWTToken(recuperado, userLogReq.getMasterPassword());

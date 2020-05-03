@@ -23,7 +23,6 @@ public class TFAController {
 
     /* URLs que no son accesibles desde ninguna otra clase */
     private static final String LOGOUT_USUARIO_URL = "api/2FA/logout";
-    private static final String TOKEN_USUARIO_URL = "/api/2FA/token";
     private static final String LOGIN_2FA_URL =  "/api/2FA/login";
     private static final String GET_2FA_KEY = "/api/2FA/get2FAkey";
 
@@ -75,16 +74,6 @@ public class TFAController {
         repo.save(usuario);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
-
-    @GetMapping(TOKEN_USUARIO_URL)
-    public ResponseEntity<JSONObject> token(HttpServletRequest request) throws UserNotFoundException {
-        JSONObject res = new JSONObject();
-        User usuario = getUserFromRequest(request, repo);
-        String token = getJWTToken(usuario, usuario.getMasterPassword());
-        res.put("token", token);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-    }
-
 
 
     private boolean isValidLong(String code) {
