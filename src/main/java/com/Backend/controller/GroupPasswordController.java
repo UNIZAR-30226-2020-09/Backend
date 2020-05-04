@@ -9,19 +9,19 @@ import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.groupPassword.InsertGroupPasswordRequest;
 import com.Backend.model.request.groupPassword.ModifyGroupPasswordRequest;
+import com.Backend.model.response.PasswordResponse;
 import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -30,12 +30,16 @@ import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
+import static com.Backend.utils.PasswordCheckUtils.generarJSONPassword;
+import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 
 @RestController
 public class GroupPasswordController {
     /* URLs que no son utilizadas desde ninguna otra clase */
     public static final String INSERTAR_GROUP_PASSWORD_URL = "/api/grupo/insertar";
     public static final String MODIFICAR_GROUP_PASSWORD_URL = "/api/grupo/anyadir";
+    public static final String LISTAR_GROUP_PASSWORDS_URL = "/api/grupo/listar";
+    public static final String ELIMINAR_GROUP_PASSWORD_URL = "/api/grupo/eliminar";
 
     @Autowired
     IPassRepo repoPass;
@@ -55,12 +59,17 @@ public class GroupPasswordController {
         try {
             User user = getUserFromRequest(request, repoUser);
             Password password = passReq.getAsPassword();
-            password.setCategory(repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(()
-                    -> new CategoryNotFoundException(passReq.getPasswordCategoryId())));
 
             if(checkSameNamePassword(user, password))
                 return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
             else {
+                Category cat = repoCat.findByUsuarioAndCategoryName(user, "Compartida");
+                if (cat == null) {
+                    cat = new Category("Compartida", user);
+                    repoCat.save(cat);
+                }
+                password.setCategory(cat);
+
                 LinkedList<String> mails = new LinkedList<>();
                 anyadeGroupPasswordAUsuarios(password, user, passReq.getUsuarios(), mails);
                 JSONObject wrong = new JSONObject();
@@ -69,8 +78,6 @@ public class GroupPasswordController {
             }
         } catch (UserNotFoundException e) {
             return peticionErronea("Usuario no existente.");
-        } catch (CategoryNotFoundException e) {
-            return peticionErronea("Categoría no encontrada.");
         }
     }
 
@@ -129,6 +136,81 @@ public class GroupPasswordController {
             return peticionErronea("La contraseña no existe.");
         }
     }
+
+    @GetMapping(LISTAR_GROUP_PASSWORDS_URL)
+    public ResponseEntity<JSONObject> listar(HttpServletRequest request){
+        try {
+            User user = getUserFromRequest(request, repoUser);
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+            TextEncryptor textEncryptor = Encryptors.text(SUPER_SECRET_KEY, "46b930");
+            return getGroupPasswords(allops, textEncryptor, user);
+        } catch (UserNotFoundException e) {
+            return peticionErronea("Usuario no existente.");
+        }
+    }
+
+    @DeleteMapping(ELIMINAR_GROUP_PASSWORD_URL)
+    public ResponseEntity<JSONObject> eliminar_group_password(HttpServletRequest request,
+                                                              @RequestParam Long id){
+
+        JSONObject res = new JSONObject();
+        if (id == null) {
+            res.put("statusText", "Los campos no pueden quedar vacíos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+        try {
+            User user = getUserFromRequest(request, repoUser);
+
+            Password password = repoPass.findById(id).orElseThrow(() -> new PasswordNotFoundException(id));
+            OwnsPassword ops = repoOwnsPass.findByPasswordAndUser(password, user);
+
+            if (ops.getRol() == 1) {
+                repoPass.delete(password);
+            } else {
+                //No eres el usuario creador
+                repoOwnsPass.delete(ops);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(res);
+        } catch (UserNotFoundException e) {
+            res.put("statusText", "Usuario no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        } catch (PasswordNotFoundException e) {
+            res.put("statusText", "Contraseña no existente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        }
+    }
+
+    // Devuelve una respuesta a peticion http con todas las passwords que hayan sido compartidas.
+    public ResponseEntity<JSONObject> getGroupPasswords(List<OwnsPassword> ownspass, TextEncryptor enc, User user){
+        JSONArray allpass = new JSONArray();
+        JSONObject res = new JSONObject();
+        Category comp = repoCat.findByUsuarioAndCategoryName(user, "Compartida");
+        if (comp != null){
+            List<Password> propias = repoPass.findByCategory(comp);
+            for(Password p : propias){  // Anyadir compartidas por el usuario
+                PasswordResponse pres = new PasswordResponse(p);
+                JSONObject a = generarJSONPassword(pres, enc);
+                a.remove("catId");
+                a.put("catId", -1);
+                allpass.add(a);
+            }
+        }
+        for(OwnsPassword op : ownspass){ // Anyadir copartidas por otros
+            if(op.getRol()==0) {
+                PasswordResponse pres = new PasswordResponse(op);
+                JSONObject a = generarJSONPassword(pres, enc);
+                a.remove("catId");
+                a.remove("categoryName");
+                a.put("catId", -1);
+                a.put("categoryName", "Compartida");
+                allpass.add(a);
+            }
+        }
+        res.put("passwords", allpass);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+
 
     //Se comprueba que el usuario no tiene una contraseña con el mismo nombre
     public boolean checkSameNamePassword(User user, Password password){

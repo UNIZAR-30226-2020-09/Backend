@@ -1,6 +1,7 @@
 package com.Backend.model.response;
 
 import com.Backend.model.OwnsPassword;
+import com.Backend.model.Password;
 import com.Backend.repository.IOwnsPassRepo;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +49,22 @@ public class PasswordResponse implements Serializable {
 
         LocalDate actual = LocalDate.now();
         LocalDate fin = ops.getPassword().getExpirationTime();
+        expirationDate = ChronoUnit.DAYS.between(actual, fin);
+    }
+
+    public PasswordResponse(Password p){
+
+        this.passId = p.getId();
+        this.passwordName = p.getPasswordName();
+        this.catId = p.getCategory().getId();
+        this.categoryName = (p.getCategory()).getCategoryName();
+        this.rol = 1;
+        this.optionalText = (p.getOptionalText());
+        this.userName = (p.getUserName());
+        this.password = p.getPassword();
+
+        LocalDate actual = LocalDate.now();
+        LocalDate fin = p.getExpirationTime();
         expirationDate = ChronoUnit.DAYS.between(actual, fin);
     }
 

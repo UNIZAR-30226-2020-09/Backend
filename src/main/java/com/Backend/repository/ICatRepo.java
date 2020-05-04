@@ -10,4 +10,5 @@ public interface ICatRepo extends JpaRepository<Category, Long> {
     List<Category> findByUsuario(User user);
     List<Category> findByUsuarioOrderByIdAsc(User user);
     Category findByUsuarioAndId(User user, Long id);
+    Category findByUsuarioAndCategoryName(User user, String categoryName);
 }
