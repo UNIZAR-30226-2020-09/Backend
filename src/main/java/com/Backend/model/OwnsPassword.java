@@ -36,16 +36,10 @@ public class OwnsPassword {
     @Setter
     private int rol;
 
-    /* Marca si la contraseña es compartida o no*/
-    @Getter
-    @Setter
-    private int grupo;
-
-    public OwnsPassword(User user, Password password, int rol, int grupo) {
+    public OwnsPassword(User user, Password password, int rol) {
         this.user = user;
         this.password = password;
         this.key = new OwnsPasswordKey(user.getId(), password.getId());
         this.rol = rol;
-        this.grupo = grupo;
     }
 }

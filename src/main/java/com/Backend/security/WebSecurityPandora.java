@@ -1,6 +1,7 @@
 package com.Backend.security;
 
 import com.Backend.repository.IUserRepo;
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.google.common.collect.ImmutableList;
 
 import static com.Backend.security.SecurityConstants.*;
 
@@ -31,6 +31,9 @@ class WebSecurityPandora extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, ESTADISTICAS).permitAll()
                 .antMatchers(HttpMethod.POST, REGISTRO_USUARIO_URL).permitAll()
                 .antMatchers(HttpMethod.POST,LOGIN_USUARIO_URL).permitAll()
+                //Solo puede quedar la de abajo
+                .antMatchers(HttpMethod.POST,LOGIN_USUARIO2FA_URL).permitAll()
+                .antMatchers(HttpMethod.POST,LOGIN_2FA_URL).permitAll()
                 .antMatchers(HttpMethod.GET, ROBUSTEZ).permitAll()
                 .antMatchers(HttpMethod.GET,CONSULTAR_TODOS_USUARIOS_URL).permitAll()
                 .antMatchers(HttpMethod.POST,CONTACTO_URL).permitAll()

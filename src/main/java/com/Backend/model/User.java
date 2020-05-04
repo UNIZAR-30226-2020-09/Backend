@@ -3,6 +3,7 @@ package com.Backend.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jboss.aerogear.security.otp.api.Base32;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -35,6 +36,18 @@ public class User {
     @Setter
     private String masterPassword;
 
+    @Getter
+    @Setter
+    private String secret;
+
+    @Getter
+    @Setter
+    private Long secretExpirationTime;
+
+    @Getter
+    @Setter
+    private Boolean loggedIn2FA;
+
     /*
      * @OneToMany( mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true) ¿En cascada?
      * Relación 1:N con la tabla entre User y Password, extremo del 1
@@ -51,6 +64,14 @@ public class User {
     public User(String mail, String masterPassword) {
         this.masterPassword = masterPassword;
         this.mail = mail;
+        this.secret = Base32.random().substring(0, 5);
+        this.secretExpirationTime = System.currentTimeMillis() + 10000;
+        this.loggedIn2FA = false;
+    }
+
+    public void updateSecret(){
+        this.secret = Base32.random().substring(0, 5);
+        this.secretExpirationTime = System.currentTimeMillis() + 10000;
     }
 }
 
