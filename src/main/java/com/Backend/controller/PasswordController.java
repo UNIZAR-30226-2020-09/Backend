@@ -116,24 +116,6 @@ public class PasswordController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping(LISTAR_PASSWORDS_USUARIO_URL)
-    public ResponseEntity<JSONObject> get_listarPorCategoria(HttpServletRequest request,
-                                                 @RequestParam String masterPassword){
-        if(masterPassword == null || masterPassword.isEmpty()) {
-            return peticionErronea("Los campos no pueden quedar vacíos.");
-        }
-        JSONObject res = new JSONObject();
-        try {
-            User user = getUserFromRequest(request, repoUser);
-            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-            TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
-            return getRespuestaListar(res, allops, textEncryptor);
-
-        } catch (UserNotFoundException e) {
-            return peticionErronea("Usuario no existente.");
-        }
-    }
-
     @PostMapping(LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL)
     public ResponseEntity<JSONObject> post_listarPorCategoria(HttpServletRequest request,
                                                               @RequestBody ListPasswordByCategoryRequest passReq){
@@ -151,35 +133,6 @@ public class PasswordController {
                 // En el constructor se calcula los días de diferencia.
                 PasswordResponse pres = new PasswordResponse(i);
                 if (!pres.getCatId().equals(passReq.getIdCat())) continue;
-                JSONObject a = generarJSONPassword(pres, textEncryptor);
-                allpass.add(a);
-            }
-            res.put("passwords", allpass);
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-
-        } catch (UserNotFoundException e) {
-            return peticionErronea("Usuario no existente.");
-        }
-    }
-
-    @GetMapping(LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL)
-    public ResponseEntity<JSONObject> get_listarPorCategoria(HttpServletRequest request,
-                                                             @RequestParam String masterPassword,
-                                                             @RequestParam Long idCat){
-        if(masterPassword == null || masterPassword.isEmpty() || idCat == null) {
-            return peticionErronea("Los campos no pueden quedar vacíos.");
-        }
-        JSONObject res = new JSONObject();
-        try {
-            User user = getUserFromRequest(request, repoUser);
-            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
-
-            JSONArray allpass = new JSONArray();
-            TextEncryptor textEncryptor = Encryptors.text(masterPassword, "46b930");
-            for (OwnsPassword i : allops) {
-                // En el constructor se calcula los días de diferencia.
-                PasswordResponse pres = new PasswordResponse(i);
-                if (!pres.getCatId().equals(idCat)) continue;
                 JSONObject a = generarJSONPassword(pres, textEncryptor);
                 allpass.add(a);
             }
