@@ -109,7 +109,7 @@ public class UserController {
         if (!userLogReq.getVerificationCode().equals(recuperado.getSecret())) {
             return peticionErronea("Codigo 2FA incorrecto.");
         }
-        if (recuperado.getSecretExpirationTime() > System.currentTimeMillis() ){
+        if (recuperado.getSecretExpirationTime() < System.currentTimeMillis() ){
             return peticionErronea("Codigo 2FA expirado.");
         }
 
