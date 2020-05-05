@@ -106,28 +106,18 @@ public class UserController {
         }
 
         Totp totp = new Totp(recuperado.getSecret());
-        if (!isValidLong(userLogReq.getVerificationCode()) ||
-                !totp.verify(userLogReq.getVerificationCode())) {
+        if (!userLogReq.getVerificationCode().equals(recuperado.getSecret())) {
             return peticionErronea("Codigo 2FA incorrecto.");
         }
         if (recuperado.getSecretExpirationTime() > System.currentTimeMillis() ){
             return peticionErronea("Codigo 2FA expirado.");
         }
 
-        String token = getJWTToken(recuperado, recuperado.getMasterPassword());
+        String token = getJWTToken(recuperado, userLogReq.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping("/api/usuarios/get2FAkey")
-    public ResponseEntity<JSONObject> get2FAkey(HttpServletRequest request) throws UserNotFoundException {
-        JSONObject res = new JSONObject();
-        User usuario = getUserFromRequest(request, repo);
-        usuario.updateSecret();
-        repo.save(usuario);
-        res.put("key", usuario.getSecret());
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-    }
 
     @GetMapping(TOKEN_USUARIO_URL)
     public ResponseEntity<JSONObject> token(HttpServletRequest request) throws UserNotFoundException {

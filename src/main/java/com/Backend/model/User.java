@@ -65,13 +65,13 @@ public class User {
         this.masterPassword = masterPassword;
         this.mail = mail;
         this.secret = Base32.random().substring(0, 5);
-        this.secretExpirationTime = System.currentTimeMillis() + 10000;
+        this.secretExpirationTime = System.currentTimeMillis() + 60000; // 1 minuto
         this.loggedIn2FA = false;
     }
 
     public void updateSecret(){
         this.secret = Base32.random().substring(0, 5);
-        this.secretExpirationTime = System.currentTimeMillis() + 10000;
+        this.secretExpirationTime = System.currentTimeMillis() + 60000; // 1 minuto
     }
 }
 
