@@ -108,13 +108,13 @@ public class UserController {
         Totp totp = new Totp(recuperado.getSecret());
         if (!isValidLong(userLogReq.getVerificationCode()) ||
                 !totp.verify(userLogReq.getVerificationCode())) {
-            return peticionErronea("Credenciales incorrectos.");
+            return peticionErronea("Codigo 2FA incorrecto.");
         }
         if (recuperado.getSecretExpirationTime() > System.currentTimeMillis() ){
             return peticionErronea("Codigo 2FA expirado.");
         }
 
-        String token = getJWTToken(recuperado, userLogReq.getMasterPassword());
+        String token = getJWTToken(recuperado, recuperado.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
