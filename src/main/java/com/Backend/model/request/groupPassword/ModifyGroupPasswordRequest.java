@@ -16,19 +16,11 @@ public class ModifyGroupPasswordRequest {
 
     @Getter
     @Setter
-    private String masterPassword;
-
-    @Getter
-    @Setter
-    private String passwordName;
-
-    @Getter
-    @Setter
     private Long passId;
 
     @Getter
     @Setter
-    private Long passwordCategoryId;
+    private String passwordName;
 
     @Getter
     @Setter
@@ -53,7 +45,6 @@ public class ModifyGroupPasswordRequest {
     public boolean isValid(){
         return  password!=null && !password.isEmpty() &&
                 passwordName!=null && !passwordName.isEmpty() &&
-                expirationTime != null && passwordCategoryId != null
-                && !usuarios.isEmpty();
+                expirationTime != null && !usuarios.isEmpty();
     }
 }

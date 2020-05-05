@@ -1,5 +1,9 @@
 package com.Backend.utils;
 
+import com.Backend.model.response.PasswordResponse;
+import net.minidev.json.JSONObject;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
+
 import java.util.Random;
 
 public class PasswordCheckUtils {
@@ -99,5 +103,19 @@ public class PasswordCheckUtils {
     // True si y solo si c es un caracter alfanumérico
     public static boolean rangoAlfanum(char c){
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+    }
+
+    public static JSONObject generarJSONPassword(PasswordResponse pres, TextEncryptor textEncryptor){
+        JSONObject a = new JSONObject();
+        a.put("passId", pres.getPassId());
+        a.put("passwordName", pres.getPasswordName());
+        a.put("catId", pres.getCatId());
+        a.put("categoryName", pres.getCategoryName());
+        a.put("rol", pres.getRol());
+        a.put("optionalText", pres.getOptionalText());
+        a.put("userName", pres.getUserName());
+        a.put("password", textEncryptor.decrypt(pres.getPassword()));
+        a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+        return a;
     }
 }
