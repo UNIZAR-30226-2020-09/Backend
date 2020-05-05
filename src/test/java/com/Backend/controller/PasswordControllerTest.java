@@ -2,6 +2,7 @@ package com.Backend.controller;
 
 
 import com.Backend.model.request.*;
+import com.Backend.model.request.groupPassword.InsertGroupPasswordRequest;
 import com.Backend.model.request.pandora.GeneratePasswordRequest;
 import com.Backend.model.request.password.InsertPasswordRequest;
 import com.Backend.model.request.password.ListPasswordRequest;
@@ -17,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import static com.Backend.controller.CategoryController.LISTAR_CATEGORIAS_USUARIO_URL;
 import static com.Backend.controller.PasswordController.*;
@@ -44,6 +46,9 @@ public class PasswordControllerTest {
     static InsertPasswordRequest ipr1;
     static InsertPasswordRequest ipr2;
     static InsertPasswordRequest ipr3;
+    static InsertGroupPasswordRequest igpr1;
+    static InsertGroupPasswordRequest igpr2;
+    static InsertGroupPasswordRequest igpr3;
     static ArrayList<Long> passwordsOfUser;
 
     @BeforeAll
@@ -72,6 +77,16 @@ public class PasswordControllerTest {
                 "pass2","jeje", "@user", 90);
         ipr3 = new InsertPasswordRequest("mP","name3", sinCategoriaIdUser3,
                 "pass3","test", null, 10);
+
+        LinkedList<String> aux = new LinkedList<String>();
+        igpr1 = new InsertGroupPasswordRequest("name1", sinCategoriaIdUser1,
+                "pass1","oT", null, 100, aux);
+        aux.add(user2.getMail());
+        igpr2 = new InsertGroupPasswordRequest("name2", sinCategoriaIdUser2,
+                "pass2","jeje", "@user", 90, aux);
+        aux.add(user3.getMail());
+        igpr3 = new InsertGroupPasswordRequest("name3", sinCategoriaIdUser3,
+                "pass3","test", null, 10, aux);
     }
 
     @AfterAll
@@ -183,10 +198,9 @@ public class PasswordControllerTest {
     void eliminar_password_OKs() throws JsonProcessingException {
 
         for(Long l : passwordsOfUser) {
-            DeleteByIdRequest dbIdReq1 = new DeleteByIdRequest(l);
-            HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(dbIdReq1), headersUser1);
-            ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + ELIMINAR_PASSWORD_URL),
-                    HttpMethod.DELETE, entity, JSONObject.class);
+            String id = Long.toString(l);
+            ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + ELIMINAR_PASSWORD_URL + "?id=" + id),
+                    HttpMethod.DELETE, new HttpEntity<>(headersUser1), JSONObject.class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -202,6 +216,62 @@ public class PasswordControllerTest {
                 HttpMethod.DELETE, entity, JSONObject.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    public static final String INSERTAR_GROUP_PASSWORD_URL = "/api/grupo/insertar";
+    public static final String MODIFICAR_GROUP_PASSWORD_URL = "/api/grupo/modificar";
+    public static final String LISTAR_GROUP_PASSWORDS_URL = "/api/grupo/listar";
+    public static final String ELIMINAR_GROUP_PASSWORD_URL = "/api/grupo/eliminar";
+    @Test
+    @Order(8)
+    void insertar_group_password_3_OKs() throws JsonProcessingException {
+
+        HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(igpr1), headersUser1);
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + INSERTAR_GROUP_PASSWORD_URL),
+                HttpMethod.POST, entity, JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(igpr2), headersUser1);
+        response = restTemplate.exchange(URI.create(url + INSERTAR_GROUP_PASSWORD_URL),
+                HttpMethod.POST, entity, JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(igpr3), headersUser1);
+        response = restTemplate.exchange(URI.create(url + INSERTAR_GROUP_PASSWORD_URL),
+                HttpMethod.POST, entity, JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @Order(9)
+    void listar_group_passwords_OK() throws JsonProcessingException {
+
+        ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + LISTAR_GROUP_PASSWORDS_URL),
+                HttpMethod.GET, new HttpEntity<>(headersUser1), JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        cogerIdsPasswords(response);
+
+        response = restTemplate.exchange(URI.create(url + LISTAR_GROUP_PASSWORDS_URL),
+                HttpMethod.GET, new HttpEntity<>(headersUser2), JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        response = restTemplate.exchange(URI.create(url + LISTAR_GROUP_PASSWORDS_URL),
+                HttpMethod.GET, new HttpEntity<>(headersUser3), JSONObject.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @Order(10)
+    void eliminar_group_password_OKs() throws JsonProcessingException {
+
+        for(Long l : passwordsOfUser) {
+            String id = Long.toString(l);
+            ResponseEntity<JSONObject> response = restTemplate.exchange(URI.create(url + ELIMINAR_GROUP_PASSWORD_URL + "?id=" + id),
+                    HttpMethod.DELETE, new HttpEntity<>(headersUser1), JSONObject.class);
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
     }
 
     // Genera la cabecera a partir de un token devuelto por PandoraApp
