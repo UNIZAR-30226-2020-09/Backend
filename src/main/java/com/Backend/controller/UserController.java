@@ -113,7 +113,7 @@ public class UserController {
             return peticionErronea("Codigo 2FA expirado.");
         }
 
-        String token = getJWTToken(recuperado, userLogReq.getMasterPassword());
+        String token = getJWTToken(recuperado, recuperado.getMasterPassword());
         res.put("token", token);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
