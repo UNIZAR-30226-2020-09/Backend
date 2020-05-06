@@ -34,6 +34,7 @@ import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.PasswordCheckUtils.generateStrongPassword;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
+import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 
 @RestController
 public class PasswordController {
@@ -106,11 +107,18 @@ public class PasswordController {
 
     public ResponseEntity<JSONObject> getRespuestaListar(JSONObject res, List<OwnsPassword> allops, TextEncryptor textEncryptor) {
         JSONArray allpass = new JSONArray();
+        JSONObject jsonPass;
+        TextEncryptor textEncryptorGrupal = Encryptors.text(SUPER_SECRET_KEY, "46b930");
         for (OwnsPassword i : allops) {
             // En el constructor se calcula los días de diferencia.
             PasswordResponse pres = new PasswordResponse(i);
-            JSONObject a = generarJSONPassword(pres, textEncryptor);
-            allpass.add(a);
+            if(!pres.getCategoryName().equals("Compartida")) {
+                jsonPass = generarJSONPassword(pres, textEncryptor);
+            }
+            else{
+                jsonPass = generarJSONPassword(pres, textEncryptorGrupal);
+            }
+            allpass.add(jsonPass);
         }
         res.put("passwords", allpass);
         return ResponseEntity.status(HttpStatus.OK).body(res);
