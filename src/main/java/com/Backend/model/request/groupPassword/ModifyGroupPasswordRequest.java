@@ -43,8 +43,13 @@ public class ModifyGroupPasswordRequest {
     LinkedList<String> usuarios;
 
     public boolean isValid(){
-        return  password!=null && !password.isEmpty() &&
-                passwordName!=null && !passwordName.isEmpty() &&
-                expirationTime != null && !usuarios.isEmpty();
+        return  passId!=null && (
+                 (passwordName!=null && !passwordName.isEmpty()) ||
+                 (password!=null && !password.isEmpty()) ||
+                 (optionalText!=null && !optionalText.isEmpty()) ||
+                 (userName!=null && !userName.isEmpty()) ||
+                 expirationTime!=null ||
+                 usuarios != null
+        );
     }
 }

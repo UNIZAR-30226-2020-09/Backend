@@ -262,10 +262,7 @@ public class PasswordController {
         a.put("rol", pres.getRol());
         a.put("optionalText", pres.getOptionalText());
         a.put("userName", pres.getUserName());
-        if(pres.getRol() == 1)
-            a.put("password", textEncryptor.decrypt(pres.getPassword()));
-        else
-            a.put("password", pres.getPassword());
+        a.put("password", textEncryptor.decrypt(pres.getPassword()));
         a.put("noDaysBeforeExpiration", pres.getExpirationDate());
         return a;
     }

@@ -222,7 +222,7 @@ public class GroupPasswordController {
                                              LinkedList<String> noEncontrados, boolean crear_op){
         repoPass.save(password);
         if(crear_op) repoOwnsPass.save(new OwnsPassword(propietario, password, 1));
-        anyadeANoPropietarios(password, propietario, mails, noEncontrados);
+        if(mails != null) anyadeANoPropietarios(password, propietario, mails, noEncontrados);
     }
 
     // Añade, si es posible, la password a todos los usuarios de mails como no propietarios. Si no
