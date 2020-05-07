@@ -18,14 +18,39 @@ public class PasswordCheckUtils {
         Random r = new Random();
         String alphabet = "";
         StringBuilder password = new StringBuilder();
+        int j = 0;
 
-        alphabet = min ? alphabet + minus : alphabet;
-        alphabet = may ? alphabet + mayus : alphabet;
-        alphabet = numbers ? alphabet + digit : alphabet;
-        alphabet = other ? alphabet + others : alphabet;
+        if(min) {
+            j++;
+            alphabet = alphabet + minus;
+            password.append(minus.charAt(r.nextInt(minus.length())));
+        }
+        if(may) {
+            j++;
+            alphabet = alphabet + mayus;
+            password.append(mayus.charAt(r.nextInt(mayus.length())));
+        }
+        if(numbers) {
+            j++;
+            alphabet = alphabet + digit;
+            password.append(digit.charAt(r.nextInt(digit.length())));
+        }
+        if(other){
+            j++;
+            alphabet = alphabet + others;
+            password.append(others.charAt(r.nextInt(others.length())));
+        }
 
-        for (int i = 0; i < longitud; i++) {
+        for (int i = j; i < longitud; i++) {
             password.append(alphabet.charAt(r.nextInt(alphabet.length())));
+        }
+
+        //Shuffle the password.randomly
+        for (int i = 0; i < password.length(); i++) {
+            int cambiarPor = r.nextInt(password.length());
+            char temp = password.charAt(cambiarPor);
+            password.setCharAt(cambiarPor, password.charAt(i));
+            password.setCharAt(i, temp);
         }
 
         return password.toString();
