@@ -16,7 +16,7 @@ public class ModifyGroupPasswordRequest {
 
     @Getter
     @Setter
-    private Long passId;
+    private Long id;
 
     @Getter
     @Setter
@@ -43,7 +43,7 @@ public class ModifyGroupPasswordRequest {
     LinkedList<String> usuarios;
 
     public boolean isValid(){
-        return  passId!=null && (
+        return  id!=null && (
                  (passwordName!=null && !passwordName.isEmpty()) ||
                  (password!=null && !password.isEmpty()) ||
                  (optionalText!=null && !optionalText.isEmpty()) ||

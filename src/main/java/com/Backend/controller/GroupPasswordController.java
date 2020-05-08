@@ -90,8 +90,8 @@ public class GroupPasswordController {
 
         try {
             User user = getUserFromRequest(request, repoUser);
-            Password password = repoPass.findById(passReq.getPassId()).orElseThrow(()
-                    -> new PasswordNotFoundException(passReq.getPassId()));
+            Password password = repoPass.findById(passReq.getId()).orElseThrow(()
+                    -> new PasswordNotFoundException(passReq.getId()));
 
             if(soyPropietario(user, password)) {
                 if (checkSameNamePassword(user, password)) {
@@ -111,7 +111,7 @@ public class GroupPasswordController {
 
                     LinkedList<String> mails = passReq.getUsuarios();
                     LinkedList<String> noEncontrados = new LinkedList<>();
-                    repoOwnsPass.deleteByPasswordAndRol(password, 0);
+                    if(mails != null) repoOwnsPass.deleteByPasswordAndRol(password, 0);
                     anyadeGroupPasswordAUsuarios(password, user, mails, noEncontrados, false);
                     JSONObject wrong = new JSONObject();
                     wrong.put("usuariosErroneos", noEncontrados);
