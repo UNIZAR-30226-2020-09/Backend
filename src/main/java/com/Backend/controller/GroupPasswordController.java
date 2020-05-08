@@ -101,6 +101,7 @@ public class GroupPasswordController {
                         TextEncryptor textEncryptor = Encryptors.text(SUPER_SECRET_KEY, "46b930");
                         password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
                     }
+                    if(passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
                     if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
                     if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
                     if (passReq.getExpirationTime() != null){
