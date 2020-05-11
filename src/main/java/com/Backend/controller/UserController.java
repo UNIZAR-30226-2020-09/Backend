@@ -62,6 +62,7 @@ public class UserController {
         repo.save(userRegReq.getAsUser());
         // Si no buscas un usuario con id falla la inserción.
         User usuario = repo.findByMail(userRegReq.getMail());
+        repoCat.save(new Category("Compartida", usuario));
         repoCat.save(new Category("Sin categoría", usuario));
         repoCat.save(new Category("Redes Sociales", usuario));
         repoCat.save(new Category("Cuentas bancarias", usuario));

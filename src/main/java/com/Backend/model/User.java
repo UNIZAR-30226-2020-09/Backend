@@ -27,10 +27,6 @@ public class User {
     @Setter
     private String mail; // Se corresponde cin el mail
 
-    @Setter
-    @Getter
-    private String token;
-
     @Column(nullable = false)
     @Getter
     @Setter

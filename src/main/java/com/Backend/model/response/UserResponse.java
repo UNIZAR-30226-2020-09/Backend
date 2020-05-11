@@ -23,7 +23,6 @@ public class UserResponse {
 
         this.id = usuario.getId();
         this.mail = usuario.getMail();
-        this.token = usuario.getToken();
         this.masterPassword = usuario.getMasterPassword();
         hasPasswords = (usuario.getPasswordSet() != null
                 && !usuario.getPasswordSet().isEmpty());

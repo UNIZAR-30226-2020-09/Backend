@@ -1,6 +1,5 @@
 package com.Backend.controller;
 
-import com.Backend.exception.CategoryNotFoundException;
 import com.Backend.exception.PasswordNotFoundException;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
@@ -28,10 +27,10 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.Backend.utils.JsonUtils.peticionErronea;
-import static com.Backend.utils.TokenUtils.getUserFromRequest;
-import static com.Backend.utils.PasswordCheckUtils.generarJSONPassword;
 import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
+import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.PasswordCheckUtils.generarJSONPassword;
+import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
 @RestController
 public class GroupPasswordController {
@@ -64,10 +63,6 @@ public class GroupPasswordController {
                 return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
             else {
                 Category cat = repoCat.findByUsuarioAndCategoryName(user, "Compartida");
-                if (cat == null) {
-                    cat = new Category("Compartida", user);
-                    repoCat.save(cat);
-                }
                 password.setCategory(cat);
 
                 LinkedList<String> mails = new LinkedList<>();
@@ -128,6 +123,7 @@ public class GroupPasswordController {
         }
     }
 
+
     @GetMapping(LISTAR_GROUP_PASSWORDS_URL)
     public ResponseEntity<JSONObject> listar(HttpServletRequest request){
         try {
@@ -175,27 +171,16 @@ public class GroupPasswordController {
     public ResponseEntity<JSONObject> getGroupPasswords(List<OwnsPassword> ownspass, TextEncryptor enc, User user){
         JSONArray allpass = new JSONArray();
         JSONObject res = new JSONObject();
-        Category comp = repoCat.findByUsuarioAndCategoryName(user, "Compartida");
-        if (comp != null){
-            List<Password> propias = repoPass.findByCategory(comp);
-            for(Password p : propias){  // Anyadir compartidas por el usuario
-                PasswordResponse pres = new PasswordResponse(p);
-                JSONObject a = generarJSONPassword(pres, enc);
-                a.remove("catId");
-                a.put("catId", -1);
-                allpass.add(a);
-            }
-        }
-        for(OwnsPassword op : ownspass){ // Anyadir copartidas por otros
-            if(op.getRol()==0) {
-                PasswordResponse pres = new PasswordResponse(op);
-                JSONObject a = generarJSONPassword(pres, enc);
-                a.remove("catId");
-                a.remove("categoryName");
-                a.put("catId", -1);
-                a.put("categoryName", "Compartida");
-                allpass.add(a);
-            }
+
+        for(OwnsPassword op : ownspass){ // Solo se añaden las compartidas
+            if (!(op.getPassword().getCategory()).getCategoryName().equals("Compartida")) continue;
+            PasswordResponse pres = new PasswordResponse(op);
+            JSONObject a = generarJSONPassword(pres, enc);
+            a.remove("catId");
+            a.remove("categoryName");
+            a.put("catId", repoCat.findByUsuarioAndCategoryName(user, "Compartida").getId());
+            a.put("categoryName", "Compartida");
+            allpass.add(a);
         }
         res.put("passwords", allpass);
         return ResponseEntity.status(HttpStatus.OK).body(res);

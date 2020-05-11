@@ -11,6 +11,8 @@ import java.util.List;
 public interface IOwnsPassRepo extends JpaRepository<OwnsPassword, Long>{
     OwnsPassword findByPasswordAndUser(Password password, User user);
     List<OwnsPassword> findAllByUser(User user);
+    List<OwnsPassword> findAllByUserAndRol(User user, int rol);
+    Long countByPassword(Password password);
     @Transactional
     void deleteByPasswordAndRol(Password password, int rol);
     boolean existsByPasswordAndUser(Password password, User user);

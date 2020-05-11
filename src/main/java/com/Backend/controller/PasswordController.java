@@ -30,11 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.PasswordCheckUtils.generateStrongPassword;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
-import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 
 @RestController
 public class PasswordController {
@@ -43,6 +43,7 @@ public class PasswordController {
     public static final String INSERTAR_PASSWORD_URL = "/api/contrasenya/insertar";
     public static final String ELIMINAR_PASSWORD_URL = "/api/contrasenya/eliminar";
     public static final String LISTAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/listar";
+    public static final String LISTAR_PASSWORDS_NO_COMPARTIDAS_USUARIO_URL = "/api/contrasenya/listarNoCompartidas";
     public static final String LISTAR_PASSWORDS_POR_CATEGORIA_USUARIO_URL = "/api/contrasenya/listarPorCategoria";
     public static final String MODIFICAR_PASSWORDS_USUARIO_URL = "/api/contrasenya/modificar";
     public static final String GENERAR_PASSWORD_URL = "/api/contrasenya/generar";
@@ -105,6 +106,24 @@ public class PasswordController {
         }
     }
 
+    @PostMapping(LISTAR_PASSWORDS_NO_COMPARTIDAS_USUARIO_URL)
+    public ResponseEntity<JSONObject> listarIndividuales(HttpServletRequest request,
+                                             @RequestBody ListPasswordRequest passReq){
+        if (!passReq.isValid()) {
+            return peticionErronea("Los campos no pueden quedar vacíos.");
+        }
+        JSONObject res = new JSONObject();
+        try {
+            User user = getUserFromRequest(request, repoUser);
+            List<OwnsPassword> allops = repoOwnsPass.findAllByUser(user);
+            TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
+            return getRespuestaListarNoCompartidas(res, allops, textEncryptor);
+
+        } catch (UserNotFoundException e) {
+            return peticionErronea("Usuario no existente.");
+        }
+    }
+
     public ResponseEntity<JSONObject> getRespuestaListar(JSONObject res, List<OwnsPassword> allops, TextEncryptor textEncryptor) {
         JSONArray allpass = new JSONArray();
         JSONObject jsonPass;
@@ -114,6 +133,25 @@ public class PasswordController {
             PasswordResponse pres = new PasswordResponse(i);
             if(!pres.getCategoryName().equals("Compartida")) {
                 jsonPass = generarJSONPassword(pres, textEncryptor);
+            }
+            else{
+                jsonPass = generarJSONPassword(pres, textEncryptorGrupal);
+            }
+            allpass.add(jsonPass);
+        }
+        res.put("passwords", allpass);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    public ResponseEntity<JSONObject> getRespuestaListarNoCompartidas(JSONObject res, List<OwnsPassword> allops, TextEncryptor textEncryptor) {
+        JSONArray allpass = new JSONArray();
+        JSONObject jsonPass;
+        TextEncryptor textEncryptorGrupal = Encryptors.text(SUPER_SECRET_KEY, "46b930");
+        for (OwnsPassword i : allops) {
+            // En el constructor se calcula los días de diferencia.
+            PasswordResponse pres = new PasswordResponse(i);
+            if(!pres.getCategoryName().equals("Compartida")) {
+                continue;
             }
             else{
                 jsonPass = generarJSONPassword(pres, textEncryptorGrupal);
