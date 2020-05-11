@@ -150,7 +150,7 @@ public class PasswordController {
         for (OwnsPassword i : allops) {
             // En el constructor se calcula los días de diferencia.
             PasswordResponse pres = new PasswordResponse(i);
-            if(!pres.getCategoryName().equals("Compartida")) {
+            if(pres.getCategoryName().equals("Compartida")) {
                 continue;
             }
             else{
