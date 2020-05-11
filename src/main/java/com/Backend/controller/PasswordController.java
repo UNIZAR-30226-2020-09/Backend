@@ -154,7 +154,7 @@ public class PasswordController {
                 continue;
             }
             else{
-                jsonPass = generarJSONPassword(pres, textEncryptorGrupal);
+                jsonPass = generarJSONPassword(pres, textEncryptor);
             }
             allpass.add(jsonPass);
         }
