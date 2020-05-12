@@ -4,6 +4,7 @@ import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.User;
 import com.Backend.model.request.user.UserRegisterRequest;
 import com.Backend.repository.IUserRepo;
+import com.Backend.utils.SendGridEmailService;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getJWTToken;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
+
 @RestController
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS})
 public class TFAController {
@@ -29,10 +31,15 @@ public class TFAController {
     @Autowired
     IUserRepo repo;
 
+    @Autowired
+    SendGridEmailService senGridService;
+
 
 
     @PostMapping(LOGIN_2FA_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
+
+
         JSONObject res = new JSONObject();
         if (!userRegReq.isValid()){
             return peticionErronea("Los campos no pueden quedar vacíos");

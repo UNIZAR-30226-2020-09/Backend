@@ -7,6 +7,7 @@ public class SecurityConstants {
     public static final String LOGIN_USUARIO_URL = "/api/usuarios/login";
     public static final String LOGIN_2FA_URL = "/api/2FA/login";
     public static final String LOGIN_USUARIO2FA_URL = "/api/usuarios/loginCon2FA";
+    public static final String VERIFICAR_USUARIO_URL = "/api/usuarios/verificar";
     public static final String REGISTRO_USUARIO_URL = "/api/usuarios/registro";
     public static final String CONSULTAR_TODOS_USUARIOS_URL = "/api/usuarios/consultarTodos";
     public static final String CONTACTO_URL = "/api/mensaje";

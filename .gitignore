@@ -30,3 +30,7 @@ build/
 
 ### VS Code ###
 .vscode/
+sendgrid.env
+sendgrid.env
+
+!.idea

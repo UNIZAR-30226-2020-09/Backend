@@ -17,19 +17,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.Backend.security.SecurityConstants.*;
-import static java.lang.Long.parseLong;
 
 public class TokenUtils {
 
     public static User getUserFromRequest(HttpServletRequest request, IUserRepo repoUser) throws UserNotFoundException{
-        Long id = getUserIdFromRequest(request);
+        String id = getUserIdFromRequest(request);
         return repoUser.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    public static Long getUserIdFromRequest(HttpServletRequest request){
+    public static String getUserIdFromRequest(HttpServletRequest request){
         final String authorization = request.getHeader("Authorization");
         //El 7 proviene de eliminar la cabecera "Bearer "
-        return parseLong(getUserIdFromToken(authorization.substring(7)));
+        return getUserIdFromToken(authorization.substring(7));
     }
 
     public static String getJWTTokenFromUser(User usuario, IUserRepo repo) throws UserNotFoundException {
@@ -46,7 +45,7 @@ public class TokenUtils {
         String token = Jwts
                 .builder()
                 .setId(UUID.randomUUID().toString()) // El id debe ser único
-                .setSubject(usuario.getId().toString()) // A quién pertenece el token
+                .setSubject(usuario.getId()) // A quién pertenece el token
                 .claim("authorities",
                         grantedAuthorities.stream()
                                 .map(GrantedAuthority::getAuthority)

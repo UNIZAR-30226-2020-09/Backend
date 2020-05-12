@@ -7,13 +7,13 @@ import lombok.Setter;
 public class UserResponse {
 
     @Getter @Setter
-    Long id;
+    String id;
     @Getter @Setter
     String mail;
     @Getter @Setter
     String masterPassword;
     @Getter @Setter
-    String token;
+    Boolean mailVerified;
     @Getter @Setter
     Boolean hasPasswords;
     @Getter @Setter
@@ -21,13 +21,14 @@ public class UserResponse {
 
     public UserResponse(User usuario){
 
-        this.id = usuario.getId();
-        this.mail = usuario.getMail();
-        this.masterPassword = usuario.getMasterPassword();
+        id = usuario.getId();
+        mail = usuario.getMail();
+        masterPassword = usuario.getMasterPassword();
         hasPasswords = (usuario.getPasswordSet() != null
                 && !usuario.getPasswordSet().isEmpty());
         hasCategories = (usuario.getCategorySet() != null
                 && !usuario.getCategorySet().isEmpty());
 
+        mailVerified = usuario.getMailVerified();
     }
 }

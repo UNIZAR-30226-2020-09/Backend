@@ -3,6 +3,7 @@ package com.Backend.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.jboss.aerogear.security.otp.api.Base32;
 
 import javax.persistence.*;
@@ -17,20 +18,25 @@ public class User {
     public static final String TABLE_NAME= "Pandora_User";
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Getter
     @Setter
-    private Long id;
+    private String id;
 
     @Column(unique = true, nullable = false)
     @Getter
     @Setter
-    private String mail; // Se corresponde cin el mail
+    private String mail; // Se corresponde con el mail
 
     @Column(nullable = false)
     @Getter
     @Setter
     private String masterPassword;
+
+    @Getter
+    @Setter
+    private Boolean mailVerified;
 
     @Getter
     @Setter
@@ -63,6 +69,7 @@ public class User {
         this.secret = Base32.random().substring(0, 5);
         this.secretExpirationTime = System.currentTimeMillis() + 60000; // 1 minuto
         this.loggedIn2FA = false;
+        this.mailVerified = false;
     }
 
     public void updateSecret(){

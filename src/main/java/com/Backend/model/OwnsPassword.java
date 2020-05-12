@@ -39,7 +39,7 @@ public class OwnsPassword {
     public OwnsPassword(User user, Password password, int rol) {
         this.user = user;
         this.password = password;
-        this.key = new OwnsPasswordKey(user.getId(), password.getId());
+        this.key = new OwnsPasswordKey(password.getId(), user.getId());
         this.rol = rol;
     }
 }
