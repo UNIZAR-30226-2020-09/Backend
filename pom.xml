@@ -19,6 +19,13 @@
 	</properties>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java -->
+		<dependency>
+			<groupId>com.sendgrid</groupId>
+			<artifactId>sendgrid-java</artifactId>
+			<version>4.4.8</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.jboss.aerogear/aerogear-otp-java -->
 		<dependency>
 			<groupId>org.jboss.aerogear</groupId>
