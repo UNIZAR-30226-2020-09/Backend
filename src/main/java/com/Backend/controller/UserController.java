@@ -12,6 +12,7 @@ import com.Backend.repository.ICatRepo;
 import com.Backend.repository.IOwnsPassRepo;
 import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
+import com.Backend.utils.SendGridEmailService;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.jboss.aerogear.security.otp.Totp;
@@ -34,12 +35,12 @@ import static com.Backend.utils.TokenUtils.*;
 public class UserController {
 
     /* URLs que no son accesibles desde ninguna otra clase */
-    private static final String LOGOUT_USUARIO_URL = "api/usuarios/logout";
     private static final String TOKEN_USUARIO_URL = "/api/usuarios/token";
     private static final String CONSULTAR_USUARIO_URL =  "/api/usuarios/consultar";
     private static final String ELIMINAR_USUARIO_URL = "/api/usuarios/eliminar";
     private static final String MODIFICAR_USUARIO_URL = "/api/usuarios/modificar";
     private static final String LOGIN_USUARIO2FA_URL = "/api/usuarios/loginCon2FA";
+    private static final String VERIFICAR_USUARIO_URL = "/api/usuarios/verificar";
     @Autowired
     IUserRepo repo;
     @Autowired
@@ -48,6 +49,10 @@ public class UserController {
     IPassRepo repoPass;
     @Autowired
     IOwnsPassRepo repoOwns;
+
+    @Autowired
+    SendGridEmailService senGridService;
+
 
     @PostMapping(REGISTRO_USUARIO_URL)
     public ResponseEntity<JSONObject> registro(@RequestBody UserRegisterRequest userRegReq) {
@@ -62,6 +67,7 @@ public class UserController {
         repo.save(userRegReq.getAsUser());
         // Si no buscas un usuario con id falla la inserción.
         User usuario = repo.findByMail(userRegReq.getMail());
+        senGridService.sendHTML("pandora.app.unizar@gmail.com", userRegReq.getMail(), "Confirme su cuenta", getVerificationUrl(usuario.getId()));
         repoCat.save(new Category("Compartida", usuario));
         repoCat.save(new Category("Sin categoría", usuario));
         repoCat.save(new Category("Redes Sociales", usuario));
@@ -102,6 +108,11 @@ public class UserController {
         User recuperado = repo.findByMail(userLogReq.getMail());
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
 
+        //TODO
+        //if(!recuperado.getMailVerified()){
+        //    return peticionErronea("Correo no verificado.");
+        //}
+
         if (!b.matches(userLogReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
         }
@@ -131,7 +142,7 @@ public class UserController {
 
     @GetMapping(CONSULTAR_USUARIO_URL)
     public ResponseEntity<JSONObject> consulta(HttpServletRequest request) throws UserNotFoundException {
-        Long id = getUserIdFromRequest(request);
+        String id = getUserIdFromRequest(request);
         JSONObject res = new JSONObject();
         if (!repo.existsById(id)){
             return peticionErronea("Usuario inexistente.");
@@ -153,7 +164,6 @@ public class UserController {
                 repoOwns.delete(owp);
             }
         }
-
         //cascada hacia categorías, que ya no tienen contraseñas
         repo.deleteById(user.getId());
         return peticionCorrecta();
@@ -193,6 +203,19 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping(VERIFICAR_USUARIO_URL)
+    public String verify(@RequestParam String id) throws UserNotFoundException {
+
+        User user = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        user.setMailVerified(true);
+        repo.save(user);
+        JSONObject res = new JSONObject();
+        res.put("OK", "OK");
+
+        return "<h1>Pandora</h1><p>&nbsp;</p><p>Mail confirmado, ya puede iniciar sesi&oacute;n&nbsp;<a title=\"Pandora\" href=\"http://app-pandora.herokuapp.com/home\">aqu&iacute;</a>&nbsp;.</p><p>&nbsp;</p>";
+    }
+
     private boolean isValidLong(String code) {
         try {
             Long.parseLong(code);
@@ -200,5 +223,9 @@ public class UserController {
             return false;
         }
         return true;
+    }
+
+    private String getVerificationUrl(String id){
+        return"<h1>Pandora</h1><p>&nbsp;</p><p>Por favor, confirme su cuenta entrando en el siguiente&nbsp;<a title=\"enlace\" href=\"https://pandorapp.herokuapp.com/api/usuarios/verificar?id=" + id + "\">enlace</a></p>";
     }
 }

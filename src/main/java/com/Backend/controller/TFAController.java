@@ -31,7 +31,8 @@ public class TFAController {
     @Autowired
     IUserRepo repo;
 
-    SendGridEmailService sges = new SendGridEmailService();
+    @Autowired
+    SendGridEmailService senGridService;
 
 
 
@@ -59,7 +60,6 @@ public class TFAController {
         repo.save(recuperado);
         String token = getJWTToken(recuperado, recuperado.getMasterPassword());
         res.put("token", token);
-        sges.sendText("pandora.app.unizar@gmail.com", userRegReq.getMail(), "Nuevo inicio de sesión", "Nuevo inicio de sesión en Pandora auth");
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 

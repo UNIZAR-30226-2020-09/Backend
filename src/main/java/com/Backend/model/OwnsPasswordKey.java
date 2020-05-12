@@ -1,6 +1,9 @@
 package com.Backend.model;
 
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
@@ -20,9 +23,9 @@ public class OwnsPasswordKey implements Serializable {
 
     @Getter
     @Setter
-    private Long userId;
+    private String userId;
 
-    public OwnsPasswordKey(Long passwordId, Long userId) {
+    public OwnsPasswordKey(Long passwordId, String userId) {
         this.passwordId = passwordId;
         this.userId = userId;
     }
