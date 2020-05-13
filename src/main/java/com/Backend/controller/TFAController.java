@@ -1,8 +1,12 @@
 package com.Backend.controller;
 
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.user.UserRegisterRequest;
+import com.Backend.model.request.user.VerifyResetRequest;
+import com.Backend.repository.IOwnsPassRepo;
+import com.Backend.repository.IPassRepo;
 import com.Backend.repository.IUserRepo;
 import com.Backend.utils.SendGridEmailService;
 import net.minidev.json.JSONObject;
@@ -10,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static com.Backend.utils.JsonUtils.peticionErronea;
 import static com.Backend.utils.TokenUtils.getJWTToken;
@@ -23,13 +30,19 @@ import static com.Backend.utils.TokenUtils.getUserFromRequest;
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS})
 public class TFAController {
 
-    /* URLs que no son accesibles desde ninguna otra clase */
+    /* URLs */
     private static final String LOGOUT_USUARIO_URL = "api/2FA/logout";
     private static final String LOGIN_2FA_URL =  "/api/2FA/login";
     private static final String GET_2FA_KEY = "/api/2FA/get2FAkey";
+    private static final String RECUPERAR_USUARIO_URL = "/api/2FA/recuperar";
+    private static final String VERIFICAR_RESET_USUARIO_URL = "/api/2FA/verificarReset";
 
     @Autowired
     IUserRepo repo;
+    @Autowired
+    IPassRepo repoPass;
+    @Autowired
+    IOwnsPassRepo repoOwns;
 
     @Autowired
     SendGridEmailService senGridService;
@@ -38,8 +51,6 @@ public class TFAController {
 
     @PostMapping(LOGIN_2FA_URL)
     public ResponseEntity<JSONObject> login(@RequestBody UserRegisterRequest userRegReq) {
-
-
         JSONObject res = new JSONObject();
         if (!userRegReq.isValid()){
             return peticionErronea("Los campos no pueden quedar vacíos");
@@ -82,6 +93,64 @@ public class TFAController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @PostMapping(RECUPERAR_USUARIO_URL)
+    public ResponseEntity<JSONObject> recuperar(@RequestBody UserRegisterRequest recuRequest) throws UserNotFoundException {
+        JSONObject res = new JSONObject();
+        if (!recuRequest.isValid()){
+            return peticionErronea("Los campos no pueden quedar vacíos");
+        }
+        if(!repo.existsByMail(recuRequest.getMail())) {
+            return peticionErronea("Usuario inexistente.");
+        }
+        User usuario = repo.findByMail(recuRequest.getMail());
+        BCryptPasswordEncoder b = new BCryptPasswordEncoder();
+        if (!b.matches(recuRequest.getMasterPassword(), usuario.getMasterPassword())) {
+            return peticionErronea("Credenciales incorrectos.");
+        }
+
+        usuario.generateResetCode();
+        repo.save(usuario);
+        senGridService.sendHTML("pandora.app.unizar@gmail.com", recuRequest.getMail(), "Código restauración 2FA", getResetCodeUrl(usuario.getResetCode()));
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @PostMapping(VERIFICAR_RESET_USUARIO_URL)
+    public ResponseEntity<JSONObject> verificarReset(@RequestBody VerifyResetRequest verifyRequest) throws UserNotFoundException {
+        JSONObject res = new JSONObject();
+        if (!verifyRequest.isValid()){
+            return peticionErronea("Los campos no pueden quedar vacíos");
+        }
+        if(!repo.existsByMail(verifyRequest.getMail())) {
+            return peticionErronea("Usuario inexistente.");
+        }
+        User usuario = repo.findByMail(verifyRequest.getMail());
+
+        BCryptPasswordEncoder b = new BCryptPasswordEncoder();
+        if (!b.matches(verifyRequest.getNewMasterPassword(), usuario.getMasterPassword())) {
+            return peticionErronea("Credenciales incorrectos.");
+        }
+
+        if (!verifyRequest.getResetCode().equals(usuario.getResetCode())) {
+            return peticionErronea("Codigo de recuperación incorrecto.");
+        }
+
+        usuario.generateResetCode();
+
+        String newHashedPassword = b.encode(verifyRequest.getNewMasterPassword());
+        usuario.setMasterPassword(newHashedPassword);
+
+        List<Password> passwords = repoOwns.findAllPasswordsByUserAndRol(usuario, 1);
+        changeEncode(passwords, verifyRequest.getOldMasterPassword(), verifyRequest.getNewMasterPassword());
+
+        usuario.setLoggedIn2FA(true);
+
+        repo.save(usuario);
+
+        res.put("token", getJWTToken(usuario, newHashedPassword));
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
 
     private boolean isValidLong(String code) {
         try {
@@ -91,4 +160,18 @@ public class TFAController {
         }
         return true;
     }
+
+    private  String getResetCodeUrl(String code){
+        return"<h1>Pandora</h1><p>&nbsp;</p><p>Su codigo de verificación es: " + code + " por favor, ingreselo en la app Pandora Auth</p>";
+    }
+
+    private void changeEncode(List<Password> passwords, String oldPass, String newPass){
+        TextEncryptor oldTextEncryptor = Encryptors.text(oldPass, "46b930");
+        TextEncryptor newTextEncryptor = Encryptors.text(newPass, "46b930");
+        for(Password pass : passwords){
+            pass.setPassword(newTextEncryptor.encrypt(oldTextEncryptor.decrypt(pass.getPassword())));
+            repoPass.save(pass);
+        }
+    }
+
 }

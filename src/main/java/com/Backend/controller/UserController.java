@@ -3,6 +3,7 @@ package com.Backend.controller;
 import com.Backend.exception.UserNotFoundException;
 import com.Backend.model.Category;
 import com.Backend.model.OwnsPassword;
+import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.UserLoginRequest;
 import com.Backend.model.request.user.ModifyUserRequest;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -108,10 +111,9 @@ public class UserController {
         User recuperado = repo.findByMail(userLogReq.getMail());
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
 
-        //TODO
-        //if(!recuperado.getMailVerified()){
-        //    return peticionErronea("Correo no verificado.");
-        //}
+        if(!recuperado.getMailVerified()){
+            return peticionErronea("Correo no verificado.");
+        }
 
         if (!b.matches(userLogReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
@@ -181,6 +183,10 @@ public class UserController {
         if (b.matches(userModReq.getOldMasterPassword(), fetchedUser.getMasterPassword())
                 && fetchedUser.getMail().equals(userModReq.getMail())) {
 
+            List<Password> passwords = repoOwns.findAllPasswordsByUserAndRol(fetchedUser, 1);
+
+            changeEncode(passwords, userModReq.getOldMasterPassword(), userModReq.getNewMasterPassword());
+
             String newHashedPassword = b.encode(userModReq.getNewMasterPassword());
             fetchedUser.setMasterPassword(newHashedPassword);
             repo.save(fetchedUser);
@@ -227,5 +233,14 @@ public class UserController {
 
     private String getVerificationUrl(String id){
         return"<h1>Pandora</h1><p>&nbsp;</p><p>Por favor, confirme su cuenta entrando en el siguiente&nbsp;<a title=\"enlace\" href=\"https://pandorapp.herokuapp.com/api/usuarios/verificar?id=" + id + "\">enlace</a></p>";
+    }
+
+    private void changeEncode(List<Password> passwords, String oldPass, String newPass){
+        TextEncryptor oldTextEncryptor = Encryptors.text(oldPass, "46b930");
+        TextEncryptor newTextEncryptor = Encryptors.text(newPass, "46b930");
+        for(Password pass : passwords){
+            pass.setPassword(newTextEncryptor.encrypt(oldTextEncryptor.decrypt(pass.getPassword())));
+            repoPass.save(pass);
+        }
     }
 }
