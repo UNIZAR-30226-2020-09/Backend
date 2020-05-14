@@ -1,6 +1,7 @@
 package com.Backend.controller;
 
 import com.Backend.exception.UserNotFoundException;
+import com.Backend.model.OwnsPassword;
 import com.Backend.model.Password;
 import com.Backend.model.User;
 import com.Backend.model.request.user.UserRegisterRequest;
@@ -147,11 +148,11 @@ public class TFAController {
 
         usuario.generateResetCode();
 
+        List<OwnsPassword> ownpasswords = repoOwns.findAllByUserAndRol(usuario, 1);
+        changeEncode(ownpasswords, verifyRequest.getOldMasterPassword(), verifyRequest.getNewMasterPassword());
+
         String newHashedPassword = b.encode(verifyRequest.getNewMasterPassword());
         usuario.setMasterPassword(newHashedPassword);
-
-        List<Password> passwords = repoOwns.findAllPasswordsByUserAndRol(usuario, 1);
-        changeEncode(passwords, verifyRequest.getOldMasterPassword(), verifyRequest.getNewMasterPassword());
 
         usuario.setLoggedIn2FA(true);
 
@@ -175,10 +176,11 @@ public class TFAController {
         return"<h1>Pandora</h1><p>&nbsp;</p><p>Su codigo de verificación es: " + code + " por favor, ingreselo en la app Pandora Auth</p>";
     }
 
-    private void changeEncode(List<Password> passwords, String oldPass, String newPass){
+    private void changeEncode(List<OwnsPassword> ownpasswords, String oldPass, String newPass){
         TextEncryptor oldTextEncryptor = Encryptors.text(oldPass, "46b930");
         TextEncryptor newTextEncryptor = Encryptors.text(newPass, "46b930");
-        for(Password pass : passwords){
+        for(OwnsPassword opass : ownpasswords){
+            Password pass = opass.getPassword();
             pass.setPassword(newTextEncryptor.encrypt(oldTextEncryptor.decrypt(pass.getPassword())));
             repoPass.save(pass);
         }
