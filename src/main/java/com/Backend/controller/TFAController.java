@@ -64,6 +64,9 @@ public class TFAController {
         if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
         }
+        if(!recuperado.getMailVerified()){
+            return peticionErronea("Correo no verificado.");
+        }
         if (recuperado.getLoggedIn2FA() == true){
             return peticionErronea("Ya se ha iniciado sesión en otro dispositivo.");
         }
@@ -106,6 +109,10 @@ public class TFAController {
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
         if (!b.matches(recuRequest.getMasterPassword(), usuario.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
+        }
+
+        if(!usuario.getMailVerified()){
+            return peticionErronea("Correo no verificado.");
         }
 
         usuario.generateResetCode();
