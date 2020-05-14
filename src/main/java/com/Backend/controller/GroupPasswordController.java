@@ -170,6 +170,7 @@ public class GroupPasswordController {
     // Devuelve una respuesta a peticion http con todas las passwords que hayan sido compartidas.
     public ResponseEntity<JSONObject> getGroupPasswords(List<OwnsPassword> ownspass, TextEncryptor enc, User user){
         JSONArray allpass = new JSONArray();
+        JSONArray alluser = new JSONArray();
         JSONObject res = new JSONObject();
 
         for(OwnsPassword op : ownspass){ // Solo se añaden las compartidas
@@ -180,6 +181,9 @@ public class GroupPasswordController {
             a.remove("categoryName");
             a.put("catId", repoCat.findByUsuarioAndCategoryName(user, "Compartida").getId());
             a.put("categoryName", "Compartida");
+            List<User> aux = repoOwnsPass.findAllUsersByPasswordAndRol(op.getPassword(), 0);
+            alluser = arrayUsuarios(repoOwnsPass.findAllUsersByPasswordAndRol(op.getPassword(), 0));
+            a.put("usuarios", alluser);
             allpass.add(a);
         }
         res.put("passwords", allpass);
@@ -247,6 +251,14 @@ public class GroupPasswordController {
         } else {
             return false;
         }
+    }
+
+    public static JSONArray arrayUsuarios(List<User> usuarios){
+        JSONArray jsa = new JSONArray();
+        for (User usr : usuarios) {
+            jsa.add(usr.getMail());
+        }
+        return jsa;
     }
 
     // Devuelve true si y solo si la categoría cat pertenece al usuario user
