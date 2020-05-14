@@ -64,6 +64,9 @@ public class TFAController {
         if (!b.matches(userRegReq.getMasterPassword(), recuperado.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
         }
+        if(!recuperado.getMailVerified()){
+            return peticionErronea("Correo no verificado.");
+        }
         if (recuperado.getLoggedIn2FA() == true){
             return peticionErronea("Ya se ha iniciado sesión en otro dispositivo.");
         }
@@ -108,6 +111,10 @@ public class TFAController {
             return peticionErronea("Credenciales incorrectos.");
         }
 
+        if(!usuario.getMailVerified()){
+            return peticionErronea("Correo no verificado.");
+        }
+
         usuario.generateResetCode();
         repo.save(usuario);
         senGridService.sendHTML("pandora.app.unizar@gmail.com", recuRequest.getMail(), "Código restauración 2FA", getResetCodeUrl(usuario.getResetCode()));
@@ -127,8 +134,11 @@ public class TFAController {
         User usuario = repo.findByMail(verifyRequest.getMail());
 
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
-        if (!b.matches(verifyRequest.getNewMasterPassword(), usuario.getMasterPassword())) {
+        if (!b.matches(verifyRequest.getOldMasterPassword(), usuario.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
+        }
+        if(verifyRequest.getOldMasterPassword().equals(verifyRequest.getNewMasterPassword())){
+            return peticionErronea("La nueva contraseña no puede ser igual.");
         }
 
         if (!verifyRequest.getResetCode().equals(usuario.getResetCode())) {
