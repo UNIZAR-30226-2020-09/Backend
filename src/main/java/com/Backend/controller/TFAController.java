@@ -134,8 +134,11 @@ public class TFAController {
         User usuario = repo.findByMail(verifyRequest.getMail());
 
         BCryptPasswordEncoder b = new BCryptPasswordEncoder();
-        if (!b.matches(verifyRequest.getNewMasterPassword(), usuario.getMasterPassword())) {
+        if (!b.matches(verifyRequest.getOldMasterPassword(), usuario.getMasterPassword())) {
             return peticionErronea("Credenciales incorrectos.");
+        }
+        if(verifyRequest.getOldMasterPassword().equals(verifyRequest.getNewMasterPassword())){
+            return peticionErronea("La nueva contraseña no puede ser igual.");
         }
 
         if (!verifyRequest.getResetCode().equals(usuario.getResetCode())) {
