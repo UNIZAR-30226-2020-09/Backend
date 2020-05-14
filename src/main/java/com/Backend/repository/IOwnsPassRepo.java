@@ -17,7 +17,8 @@ public interface IOwnsPassRepo extends JpaRepository<OwnsPassword, Long>{
 
     @Query("SELECT r.user FROM OwnsPassword r WHERE r.password = :password AND r.rol = :rol")
     List<User> findAllUsersByPasswordAndRol(@Param("password") Password password, @Param("rol") int rol);
-
+    
+    List<OwnsPassword> findAllByUserAndRol(User user, int rol);
     Long countByPassword(Password password);
     @Transactional
     void deleteByPasswordAndRol(Password password, int rol);

@@ -183,9 +183,9 @@ public class UserController {
         if (b.matches(userModReq.getOldMasterPassword(), fetchedUser.getMasterPassword())
                 && fetchedUser.getMail().equals(userModReq.getMail())) {
 
-            List<Password> passwords = repoOwns.findAllPasswordsByUserAndRol(fetchedUser, 1);
+            List<OwnsPassword> ownpasswords = repoOwns.findAllByUserAndRol(fetchedUser, 1);
+            changeEncode(ownpasswords, userModReq.getOldMasterPassword(), userModReq.getNewMasterPassword());
 
-            changeEncode(passwords, userModReq.getOldMasterPassword(), userModReq.getNewMasterPassword());
 
             String newHashedPassword = b.encode(userModReq.getNewMasterPassword());
             fetchedUser.setMasterPassword(newHashedPassword);
@@ -235,10 +235,11 @@ public class UserController {
         return"<h1>Pandora</h1><p>&nbsp;</p><p>Por favor, confirme su cuenta entrando en el siguiente&nbsp;<a title=\"enlace\" href=\"https://pandorapp.herokuapp.com/api/usuarios/verificar?id=" + id + "\">enlace</a></p>";
     }
 
-    private void changeEncode(List<Password> passwords, String oldPass, String newPass){
+    private void changeEncode(List<OwnsPassword> ownpasswords, String oldPass, String newPass){
         TextEncryptor oldTextEncryptor = Encryptors.text(oldPass, "46b930");
         TextEncryptor newTextEncryptor = Encryptors.text(newPass, "46b930");
-        for(Password pass : passwords){
+        for(OwnsPassword opass : ownpasswords){
+            Password pass = opass.getPassword();
             pass.setPassword(newTextEncryptor.encrypt(oldTextEncryptor.decrypt(pass.getPassword())));
             repoPass.save(pass);
         }
