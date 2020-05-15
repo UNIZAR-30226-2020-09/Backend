@@ -134,10 +134,10 @@ public class CategoryController {
         return jsa;
     }
 
-    //Primera en crearse al crear usuario, menor id
+    //Segunda en crearse al crear usuario, segunda con menor id
     public static Category getSinCategoria(ICatRepo repoCat, User usuario) {
         List<Category> categorias = repoCat.findByUsuarioOrderByIdAsc(usuario);
-        return categorias.get(0);
+        return categorias.get(1);
     }
 
 }
