@@ -73,7 +73,7 @@ public class UserController {
         senGridService.sendHTML("pandora.app.unizar@gmail.com", userRegReq.getMail(), "Confirme su cuenta", getVerificationUrl(usuario.getId()));
         repoCat.save(new Category("Compartida", usuario));
         repoCat.save(new Category("Sin categoría", usuario));
-        repoCat.save(new Category("Redes Sociales", usuario));
+        repoCat.save(new Category("Redes sociales", usuario));
         repoCat.save(new Category("Cuentas bancarias", usuario));
         repoCat.save(new Category("Tarjetas de crédito", usuario));
         return peticionCorrecta();
