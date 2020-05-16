@@ -104,7 +104,7 @@ public class CategoryController {
                 return peticionErronea("No se permite modificar esa categoría.");
             }
             else {
-                Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, cat.getCategoryName());
+                Boolean existsCat = repoCat.existsByUsuarioAndCategoryName(usuario, modCat.getCategoryName());
                 if (existsCat) {
                     return peticionErronea("Ya existe una categoría con ese nombre para el usuario.");
                 }
