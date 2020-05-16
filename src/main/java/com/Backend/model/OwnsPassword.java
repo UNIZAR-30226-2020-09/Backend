@@ -25,7 +25,7 @@ public class OwnsPassword {
     private Password password;
 
     /* Relacion 1:N con Password, extremo de la N */
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.REMOVE)
     @MapsId("userId")
     @Getter
     @Setter
