@@ -30,7 +30,7 @@ public class Category {
 
     /* Relación 1:N con usuario, extremo de la N */
     public static final String COLUMN_CAT_NAME = "FK_User";
-    @ManyToOne(cascade=CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = Category.COLUMN_CAT_NAME, nullable = false)
     @Getter
     private User usuario;
