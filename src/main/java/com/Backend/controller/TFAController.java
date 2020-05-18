@@ -181,6 +181,7 @@ public class TFAController {
         TextEncryptor newTextEncryptor = Encryptors.text(newPass, "46b930");
         for(OwnsPassword opass : ownpasswords){
             Password pass = opass.getPassword();
+            if (pass.getCategory().getCategoryName().equals("Compartida")) continue;
             pass.setPassword(newTextEncryptor.encrypt(oldTextEncryptor.decrypt(pass.getPassword())));
             repoPass.save(pass);
         }
