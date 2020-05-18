@@ -173,7 +173,7 @@ public class TFAController {
     }
 
     private  String getResetCodeUrl(String code){
-        return"<h1>Pandora</h1><p>&nbsp;</p><p>Su codigo de verificación es: " + code + " por favor, ingreselo en la app Pandora Auth</p>";
+        return"<h1>Pandora</h1><p>&nbsp;</p><p>Su código de verificación es: " + code + " por favor, ingréselo en la app PandoraAuth</p>";
     }
 
     private void changeEncode(List<OwnsPassword> ownpasswords, String oldPass, String newPass){
