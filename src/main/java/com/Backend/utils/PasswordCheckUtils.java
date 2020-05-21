@@ -141,6 +141,7 @@ public class PasswordCheckUtils {
         a.put("userName", pres.getUserName());
         a.put("password", textEncryptor.decrypt(pres.getPassword()));
         a.put("noDaysBeforeExpiration", pres.getExpirationDate());
+        a.put("robustez", gradoRobustez(textEncryptor.decrypt(pres.getPassword())));
         return a;
     }
 }

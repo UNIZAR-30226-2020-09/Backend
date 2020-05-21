@@ -33,6 +33,7 @@ import java.util.List;
 import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
+import static com.Backend.utils.PasswordCheckUtils.generarJSONPassword;
 import static com.Backend.utils.PasswordCheckUtils.generateStrongPassword;
 import static com.Backend.utils.TokenUtils.getUserFromRequest;
 
@@ -289,19 +290,5 @@ public class PasswordController {
         else{
             return peticionErronea("Parámetros incorrectos.");
         }
-    }
-
-    public JSONObject generarJSONPassword(PasswordResponse pres, TextEncryptor textEncryptor){
-        JSONObject a = new JSONObject();
-        a.put("passId", pres.getPassId());
-        a.put("passwordName", pres.getPasswordName());
-        a.put("catId", pres.getCatId());
-        a.put("categoryName", pres.getCategoryName());
-        a.put("rol", pres.getRol());
-        a.put("optionalText", pres.getOptionalText());
-        a.put("userName", pres.getUserName());
-        a.put("password", textEncryptor.decrypt(pres.getPassword()));
-        a.put("noDaysBeforeExpiration", pres.getExpirationDate());
-        return a;
     }
 }
