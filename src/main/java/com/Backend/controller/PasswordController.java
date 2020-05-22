@@ -256,7 +256,7 @@ public class PasswordController {
                 Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
                 password.setCategory(newCat);
             }
-
+            repoOwnsPass.deleteByPasswordAndRol(password, 0);
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
             if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
             if (passReq.getExpirationTime() != null){

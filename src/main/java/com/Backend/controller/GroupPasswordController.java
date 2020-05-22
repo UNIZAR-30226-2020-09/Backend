@@ -94,13 +94,7 @@ public class GroupPasswordController {
                 } else {
                     LinkedList<String> mails = passReq.getUsuarios();
                     LinkedList<String> noEncontrados = new LinkedList<>();
-                    if(mails != null){
-                        System.out.println("Tenemos mails");
-                        repoOwnsPass.deleteByPasswordAndRol(password, 0);
-                    }
-                    else{
-                        System.out.println("No tenemos mails");
-                    }
+                    if(mails != null) repoOwnsPass.deleteByPasswordAndRol(password, 0);
                     if(passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
                     if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
                     if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
