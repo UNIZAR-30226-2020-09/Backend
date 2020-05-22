@@ -92,6 +92,15 @@ public class GroupPasswordController {
                 if (checkSameNamePassword(user, password)) {
                     return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 } else {
+                    LinkedList<String> mails = passReq.getUsuarios();
+                    LinkedList<String> noEncontrados = new LinkedList<>();
+                    if(mails != null){
+                        System.out.println("Tenemos mails");
+                        repoOwnsPass.deleteByPasswordAndRol(password, 0);
+                    }
+                    else{
+                        System.out.println("No tenemos mails");
+                    }
                     if(passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
                     if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
                     if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
@@ -105,9 +114,7 @@ public class GroupPasswordController {
                         password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
                     }
 
-                    LinkedList<String> mails = passReq.getUsuarios();
-                    LinkedList<String> noEncontrados = new LinkedList<>();
-                    if(mails != null) repoOwnsPass.deleteByPasswordAndRol(password, 0);
+
                     anyadeGroupPasswordAUsuarios(password, user, mails, noEncontrados, false);
                     JSONObject wrong = new JSONObject();
                     wrong.put("usuariosErroneos", noEncontrados);
