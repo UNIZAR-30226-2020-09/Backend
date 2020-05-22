@@ -92,16 +92,16 @@ public class GroupPasswordController {
                 if (checkSameNamePassword(user, password)) {
                     return peticionErronea("Ya existe una contraseña con el mismo nombre para el usuario");
                 } else {
+                    TextEncryptor textEncryptor = Encryptors.text(SUPER_SECRET_KEY, "46b930");
                     if(passReq.getPasswordName() != null) password.setPasswordName(passReq.getPasswordName());
                     if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
                     if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
-                    if (passReq.getExpirationTime() != null && !passReq.getPassword().equals(password.getPassword())){
+                    if (passReq.getExpirationTime() != null && !textEncryptor.encrypt(passReq.getPassword()).equals(password.getPassword())){
                         LocalDate ld = LocalDate.now();
                         ld = ld.plusDays(passReq.getExpirationTime());
                         password.setExpirationTime(ld);
                     }
                     if (passReq.getPassword() != null) {
-                        TextEncryptor textEncryptor = Encryptors.text(SUPER_SECRET_KEY, "46b930");
                         password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
                     }
 
