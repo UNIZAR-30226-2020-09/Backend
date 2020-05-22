@@ -259,7 +259,7 @@ public class PasswordController {
 
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
             if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
-            if (passReq.getExpirationTime() != null && !passReq.getPassword().equals(password.getPassword())){
+            if (passReq.getExpirationTime() != null){
                 LocalDate ld = LocalDate.now();
                 ld = ld.plusDays(passReq.getExpirationTime());
                 if (ld.toEpochDay() != password.getExpirationTime().toEpochDay()) password.setExpirationTime(ld);
