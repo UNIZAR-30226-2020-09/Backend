@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.Backend.controller.CategoryController.getSinCategoria;
 import static com.Backend.security.SecurityConstants.SUPER_SECRET_KEY;
 import static com.Backend.utils.JsonUtils.peticionCorrecta;
 import static com.Backend.utils.JsonUtils.peticionErronea;
@@ -254,6 +255,7 @@ public class PasswordController {
             }
             if (passReq.getPasswordCategoryId() != null) {
                 Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
+                if (newCat.getCategoryName().equals("Compartida")) newCat = getSinCategoria(repoCat,user);
                 password.setCategory(newCat);
             }
             repoOwnsPass.deleteByPasswordAndRol(password, 0);
