@@ -256,16 +256,17 @@ public class PasswordController {
                 Category newCat = repoCat.findById(passReq.getPasswordCategoryId()).orElseThrow(() -> new CategoryNotFoundException(passReq.getPasswordCategoryId()));
                 password.setCategory(newCat);
             }
-            if (passReq.getPassword() != null) {
-                TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
-                password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
-            }
+
             if (passReq.getOptionalText() != null) password.setOptionalText(passReq.getOptionalText());
             if (passReq.getUserName() != null) password.setUserName(passReq.getUserName());
-            if (passReq.getExpirationTime() != null){
+            if (passReq.getExpirationTime() != null && !passReq.getPassword().equals(password.getPassword())){
                 LocalDate ld = LocalDate.now();
                 ld = ld.plusDays(passReq.getExpirationTime());
                 password.setExpirationTime(ld);
+            }
+            if (passReq.getPassword() != null) {
+                TextEncryptor textEncryptor = Encryptors.text(passReq.getMasterPassword(), "46b930");
+                password.setPassword(textEncryptor.encrypt(passReq.getPassword()));
             }
             repoPass.save(password);
             return peticionCorrecta();
